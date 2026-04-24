@@ -43,7 +43,7 @@ A comprehensive Learning Management System built with a Spring Boot Java backend
 2. Update your database configuration in `src/main/resources/application.properties`.
 3. Run the application:
    ```bash
-   mvn spring-boot:run
+   .\mvnw spring-boot:run
    ```
    *(The backend server will typically start on `http://localhost:8080`)*
 
