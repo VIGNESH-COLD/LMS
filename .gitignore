@@ -1,0 +1,30 @@
+# Java
+target/
+*.class
+*.jar
+*.war
+*.ear
+
+# Frontend
+node_modules/
+dist/
+build/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Environment
+.env
+.env.local
+
+# Temporary files
+*.tmp
+*.swp

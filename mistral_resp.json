@@ -1,0 +1,1 @@
+{"id":"d54eb70419ec46c8808736c0d5332fa9","created":1777017581,"model":"mistral-small-latest","usage":{"prompt_tokens":16,"total_tokens":29,"completion_tokens":13,"prompt_tokens_details":{"cached_tokens":0}},"object":"chat.completion","choices":[{"index":0,"finish_reason":"stop","message":{"role":"assistant","tool_calls":null,"content":"Hello! 😊 How can I assist you today?"}}]}

@@ -1,0 +1,1125 @@
+================================================================================
+        LMS (LEARNING MANAGEMENT SYSTEM) - COMPLETE PROJECT EXPLANATION
+                    RIT-IMS v2.0 (Rajalakshmi Institute of Technology)
+================================================================================
+
+TABLE OF CONTENTS
+-----------------
+1. Project Overview
+2. Technology Stack
+3. Project Architecture
+4. Backend Explanation
+   4.1 Configuration Layer
+   4.2 Model Layer (Database Entities)
+   4.3 DTO Layer (Data Transfer Objects)
+   4.4 Repository Layer
+   4.5 Service Layer
+   4.6 Controller Layer (All APIs Explained)
+5. Frontend Explanation
+   5.1 Entry Point & Routing
+   5.2 Context Providers
+   5.3 API Service Layer
+   5.4 Components
+   5.5 Pages (Every UI Element Explained)
+6. How To Run
+7. Database Configuration
+
+================================================================================
+1. PROJECT OVERVIEW
+================================================================================
+
+This is a full-stack Learning Management System (LMS) built for Rajalakshmi
+Institute of Technology. It provides a web-based portal for managing academic
+activities across three user roles:
+
+  - ADMIN: Manages faculty, students, courses, timetables, calendar, deadlines
+  - INSTRUCTOR (Faculty): Manages courses, quizzes, assignments, marks, materials
+  - STUDENT: Views subjects, marks, assignments, achievements, events, timetable
+
+The application uses a REST API architecture where:
+  - Backend (Spring Boot) runs on http://localhost:8080
+  - Frontend (React + Vite) runs on http://localhost:5173
+  - Frontend communicates with backend via Axios HTTP client
+  - Authentication uses JWT (JSON Web Tokens) - stateless, no server sessions
+
+================================================================================
+2. TECHNOLOGY STACK
+================================================================================
+
+BACKEND:
+  - Java 17+ (Programming Language)
+  - Spring Boot 3.2.4 (Web Framework)
+  - Spring Security (Authentication & Authorization)
+  - Spring Data JPA (Database ORM - maps Java objects to database tables)
+  - MySQL (Relational Database, database name: lms_db)
+  - JWT / jjwt 0.12.5 (Token-based authentication)
+  - Lombok (Reduces boilerplate code - auto-generates getters, setters, etc.)
+  - BCrypt (Password hashing algorithm)
+  - Maven (Build tool & dependency manager)
+
+FRONTEND:
+  - React 18.3.1 (UI Component Library)
+  - Vite 5.3.1 (Build Tool & Dev Server - faster than Create React App)
+  - Tailwind CSS 3.4.4 (Utility-first CSS framework)
+  - React Router DOM 6.23.1 (Client-side page routing)
+  - Axios 1.7.2 (HTTP client for making API calls)
+
+================================================================================
+3. PROJECT ARCHITECTURE
+================================================================================
+
+The project follows a layered architecture:
+
+FRONTEND (React SPA):
+  User Browser --> React Components --> Axios API Service --> HTTP Requests
+
+BACKEND (Spring Boot):
+  HTTP Request --> Security Filter (JWT) --> Controller --> Service --> Repository --> MySQL
+
+Data Flow Example (Student Login):
+  1. User enters email/password on LoginPage.jsx
+  2. Frontend calls authAPI.login() which sends POST /api/auth/login
+  3. AuthController receives the request
+  4. AuthService validates credentials using BCrypt
+  5. JwtUtil generates a JWT token with userId, email, role
+  6. Token is returned to frontend
+  7. Frontend stores token in localStorage
+  8. All future API calls include token in Authorization header
+  9. JwtAuthFilter validates token on every request
+
+================================================================================
+4. BACKEND EXPLANATION
+================================================================================
+
+--------------------------------------------------------------------------------
+4.1 CONFIGURATION LAYER (src/main/java/com/lms/config/)
+--------------------------------------------------------------------------------
+
+SecurityConfig.java
+  - Configures Spring Security for the entire application
+  - Disables CSRF (not needed for stateless JWT auth)
+  - Enables CORS for frontend at localhost:5173
+  - Sets session management to STATELESS (no server-side sessions)
+  - Defines which URLs are public vs protected:
+      PUBLIC (no login needed):
+        /api/auth/** (login, forgot-password, change-password)
+        GET /api/courses/** (browse courses)
+        GET /api/course-materials/** (view materials)
+        GET /api/files/** (download files)
+        GET /api/events/** (view events)
+        GET /api/announcements/** (view announcements)
+        GET /api/semester-calendar/** (view calendar)
+      ADMIN ONLY:
+        /api/admin/** (all admin operations)
+      AUTHENTICATED (any logged-in user):
+        All other endpoints
+  - Adds JwtAuthFilter before Spring's default authentication filter
+  - Creates BCryptPasswordEncoder bean for password hashing
+
+JwtUtil.java
+  - Handles all JWT token operations
+  - generateToken(email, role, userId): Creates a signed JWT containing:
+      subject = user's email
+      claim "role" = user's role (STUDENT/INSTRUCTOR/ADMIN)
+      claim "userId" = user's database ID
+      issuedAt = current time
+      expiration = current time + 86400000ms (24 hours)
+  - extractEmail(token): Reads the email from token
+  - extractRole(token): Reads the role from token
+  - extractUserId(token): Reads the userId from token
+  - isTokenValid(token): Checks if token is valid and not expired
+  - Uses HMAC-SHA256 signing with secret key from application.properties
+
+JwtAuthFilter.java
+  - Runs on EVERY HTTP request before it reaches any controller
+  - Reads the "Authorization" header from the request
+  - If header starts with "Bearer ", extracts the token
+  - Validates the token using JwtUtil
+  - If valid, creates a Spring Security Authentication object
+  - Sets the authenticated user in SecurityContextHolder
+  - Request then proceeds to the controller
+
+CorsConfig.java
+  - Allows cross-origin requests from http://localhost:5173
+  - Permits all HTTP methods (GET, POST, PUT, DELETE, etc.)
+  - Permits all headers
+  - Allows credentials (cookies, auth headers)
+
+--------------------------------------------------------------------------------
+4.2 MODEL LAYER - DATABASE ENTITIES (src/main/java/com/lms/model/)
+--------------------------------------------------------------------------------
+
+Each model class maps to a MySQL table. Spring JPA auto-creates tables.
+
+User.java (Table: users)
+  Fields: id, name, email (unique), password (hashed), role (STUDENT/INSTRUCTOR/ADMIN),
+          avatar, department, section, rollNumber, year, semester, phoneNumber, createdAt
+  Relations: One user can teach many courses (instructor), one user can have many enrollments
+
+Role.java (Enum)
+  Values: STUDENT, INSTRUCTOR, ADMIN
+
+Course.java (Table: courses)
+  Fields: id, title, description, thumbnail, instructor_id (FK to users), createdAt
+  Relations: Has many modules, quizzes, assignments, enrollments
+
+Module.java (Table: modules)
+  Fields: id, title, description, orderIndex, course_id (FK to courses)
+  Relations: Belongs to a course, has many materials
+
+Material.java (Table: materials)
+  Fields: id, title, type (VIDEO/DOCUMENT/LINK/FILE), url, fileName, fileSize, module_id
+  Relations: Belongs to a module
+
+Quiz.java (Table: quizzes)
+  Fields: id, title, description, timeLimit, passingScore, maxAttempts, course_id, createdAt
+  Relations: Belongs to a course, has many questions and submissions
+
+Question.java (Table: questions)
+  Fields: id, questionText, type (MCQ/TRUE_FALSE/SHORT_ANSWER), options (JSON), correctAnswer, points, quiz_id
+  Relations: Belongs to a quiz
+
+Assignment.java (Table: assignments)
+  Fields: id, title, description, deadline, totalMarks, course_id, createdAt
+  Relations: Belongs to a course, has many submissions
+
+Submission.java (Table: submissions)
+  Fields: id, student_id, quiz_id, assignment_id, answers (JSON), content, filePath,
+          score, totalMarks, graded, feedback, submittedAt, gradedAt
+  Relations: Belongs to a student, optionally to a quiz or assignment
+
+Enrollment.java (Table: enrollments)
+  Fields: id, student_id (FK), course_id (FK), enrolledAt
+  Relations: Links a student to a course
+
+InternalMark.java (Table: internal_marks)
+  Fields: id, student_id, course_id, exam1, exam2, exam3, attendance, total
+  Relations: Links a student's marks to a course
+
+Achievement.java (Table: achievements)
+  Fields: id, title, description, icon, badge (GOLD/SILVER/BRONZE), student_id, course_id, awardedAt
+  Relations: Belongs to a student, optionally to a course
+
+Event.java (Table: events)
+  Fields: id, title, description, eventDate, location, type, createdBy (FK to users)
+
+Announcement.java (Table: announcements)
+  Fields: id, title, content, priority, targetRole, createdBy (FK), createdAt
+
+Timetable.java (Table: timetables)
+  Fields: id, course_id, dayOfWeek, startTime, endTime, room, building
+
+SyllabusItem.java (Table: syllabus_items)
+  Fields: id, course_id, topic, description, completed, completedDate, orderIndex
+
+CourseMaterial.java (Table: course_materials)
+  Fields: id, course_id, uploadedBy (FK), title, description, originalFileName,
+          storedFileName, fileSize, fileType, uploadedAt
+
+SemesterCalendar.java (Table: semester_calendars)
+  Fields: id, title, description, date, type
+
+MaterialType.java (Enum): VIDEO, DOCUMENT, LINK, FILE
+QuestionType.java (Enum): MCQ, TRUE_FALSE, SHORT_ANSWER
+
+--------------------------------------------------------------------------------
+4.3 DTO LAYER (src/main/java/com/lms/dto/)
+--------------------------------------------------------------------------------
+
+DTOs are used to transfer data between frontend and backend.
+They separate internal database models from what the API exposes.
+
+LoginRequest: email, password
+AuthResponse: token, userId, name, email, role, department, section, rollNumber, year, semester, phoneNumber
+RegisterRequest: name, email, password, role, department, section, rollNumber, year, semester, phoneNumber
+ChangePasswordRequest: oldPassword, newPassword, confirmPassword
+ForgotPasswordRequest: email, newPassword
+CourseRequest: title, description
+CourseResponse: id, title, description, instructorName, moduleCount, studentCount
+ModuleRequest: title, description, orderIndex
+ModuleResponse: id, title, description, orderIndex, materials
+MaterialResponse: id, title, type, url, fileName, fileSize
+QuizRequest: title, description, courseId, timeLimit, passingScore, maxAttempts, questions
+QuizResponse: id, title, description, courseId, courseTitle, timeLimit, passingScore, questions
+QuestionRequest: questionText, type, options, correctAnswer, points
+QuestionResponse: id, questionText, type, options, correctAnswer, points
+AssignmentRequest: title, description, courseId, deadline, totalMarks
+AssignmentResponse: id, title, description, courseId, courseTitle, deadline, totalMarks
+QuizSubmissionRequest: quizId, answers (map of questionId to answer)
+SubmissionResponse: id, studentName, quizTitle, assignmentTitle, score, totalMarks, graded, feedback, submittedAt
+GradeRequest: score, feedback
+AnalyticsResponse: contains maps of various analytics data
+
+--------------------------------------------------------------------------------
+4.4 REPOSITORY LAYER (src/main/java/com/lms/repository/)
+--------------------------------------------------------------------------------
+
+Each repository extends JpaRepository which provides automatic CRUD operations:
+  save(), findById(), findAll(), deleteById(), count()
+
+Custom query methods (Spring Data derives SQL from method names):
+  UserRepository: findByEmail(email), findByRole(role)
+  CourseRepository: findByInstructorId(id), searchByTitleContaining(keyword)
+  EnrollmentRepository: findByStudentId(id), findByCourseId(id), existsByStudentIdAndCourseId()
+  QuizRepository: findByCourseId(id)
+  AssignmentRepository: findByCourseId(id)
+  SubmissionRepository: findByStudentId(id), findByQuizId(id), findByAssignmentId(id)
+  InternalMarkRepository: findByStudentId(id), findByCourseId(id)
+  AchievementRepository: findByStudentId(id)
+  EventRepository: findByEventDateAfterOrderByEventDateAsc(now)
+  AnnouncementRepository: findByTargetRoleOrTargetRole(role, "ALL")
+  TimetableRepository: findByCourseId(id), findByDayOfWeek(day)
+  SyllabusItemRepository: findByCourseIdOrderByOrderIndexAsc(id)
+  CourseMaterialRepository: findByCourseId(id), findByUploadedById(id)
+  SemesterCalendarRepository: findByDateAfterOrderByDateAsc(today)
+
+--------------------------------------------------------------------------------
+4.5 SERVICE LAYER (src/main/java/com/lms/service/)
+--------------------------------------------------------------------------------
+
+Services contain the business logic. Each service is called by its controller.
+
+AuthService:
+  - login(): Finds user by email, verifies password with BCrypt, generates JWT
+  - resetPassword(): Finds user by email, updates password
+  - changePassword(): Verifies old password, then updates to new password
+  - getUserByEmail(), getUserById(): Lookup helpers
+
+AdminService:
+  - getAllUsers(): Returns all users
+  - getUsersByRole(): Filters users by role
+  - createUser(): Creates a new user with BCrypt-hashed password
+  - updateUser(): Updates user details (name, email, dept, section, etc.)
+  - updateUserRole(): Changes a user's role
+  - deleteUser(): Removes a user
+  - allocateCourseToInstructor(): Assigns a course to a faculty member
+  - extendDeadline(): Updates an assignment's deadline
+  - getSystemStats(): Returns counts of students, instructors, courses, etc.
+
+CourseService:
+  - getAllCourses(): Returns all courses with module/student counts
+  - getCourseById(): Returns single course with full details
+  - getCoursesByInstructor(): Returns courses taught by a specific instructor
+  - searchCourses(): Searches courses by keyword in title
+  - createCourse(): Creates a new course assigned to the instructor
+  - updateCourse(): Updates course title/description (only by owner)
+  - deleteCourse(): Deletes course (only by owner)
+  - addModule(): Adds a learning module to a course
+  - deleteModule(): Removes a module
+  - addMaterial(): Adds a material (video/doc/link) to a module
+  - getModulesByCourse(): Returns all modules for a course
+
+EnrollmentService:
+  - enroll(): Enrolls a student in a course (checks for duplicates)
+  - unenroll(): Removes enrollment
+  - isEnrolled(): Checks if student is enrolled
+  - getEnrollmentsByStudent(): Returns all enrollments for a student
+
+QuizService:
+  - createQuiz(): Creates quiz with questions (only instructors)
+  - getQuizzesByCourse(): Returns all quizzes for a course
+  - getQuizById(): Returns quiz details (hides answers for students)
+  - deleteQuiz(): Removes a quiz (only by creator)
+
+AssignmentService:
+  - createAssignment(): Creates assignment with deadline and marks
+  - getAssignmentsByCourse(): Returns assignments for a course
+  - getAssignmentById(): Returns single assignment
+  - deleteAssignment(): Removes assignment (only by creator)
+
+SubmissionService:
+  - submitQuiz(): Auto-grades quiz by comparing answers to correct answers
+  - submitAssignment(): Saves student's assignment submission
+  - gradeSubmission(): Instructor manually grades a submission
+  - getSubmissionsByStudent(): Returns all submissions by a student
+  - getSubmissionsByQuiz(): Returns all submissions for a quiz
+  - getSubmissionsByAssignment(): Returns all submissions for an assignment
+
+InternalMarkService:
+  - getByStudent(): Returns all internal marks for a student
+  - getByCourse(): Returns all marks for a course
+  - uploadMark(): Creates/updates marks (exam1, exam2, exam3, attendance, total)
+  - delete(): Removes a mark entry
+
+AchievementService:
+  - getByStudent(): Returns achievements earned by a student
+  - create(): Awards an achievement (title, icon, badge level)
+  - delete(): Removes an achievement
+
+EventService:
+  - getAll(): Returns all events
+  - getUpcoming(): Returns events with date after now
+  - create(): Creates new event (title, description, date, location, type)
+  - delete(): Removes an event
+
+AnnouncementService:
+  - getAll(): Returns all announcements
+  - getForRole(): Returns announcements targeting a specific role or "ALL"
+  - create(): Creates announcement (title, content, priority, targetRole)
+  - delete(): Removes an announcement
+
+TimetableService:
+  - getAll(): Returns all timetable entries
+  - getByCourse(): Returns schedule for a specific course
+  - getByDay(): Returns all classes on a specific day
+  - create(): Creates a timetable entry (course, day, time, room, building)
+  - delete(): Removes a timetable entry
+
+SyllabusService:
+  - getByCourse(): Returns syllabus topics for a course ordered by index
+  - getProgress(): Returns percentage of completed topics
+  - create(): Adds a syllabus topic
+  - toggleComplete(): Marks a topic as completed/uncompleted
+  - delete(): Removes a syllabus topic
+
+CourseMaterialService:
+  - uploadMaterial(): Saves file to disk + creates database record
+  - getMaterialsByCourse(): Returns materials for a course
+  - getMaterialsByInstructor(): Returns materials uploaded by an instructor
+  - deleteMaterial(): Deletes file from disk + removes database record
+
+SemesterCalendarService:
+  - getAll(): Returns all calendar entries
+  - getUpcoming(): Returns future calendar entries
+  - create(): Creates calendar entry (title, date, type)
+  - delete(): Removes a calendar entry
+
+AnalyticsService:
+  - getInstructorAnalytics(): Returns stats for an instructor's courses
+  - getStudentAnalytics(): Returns stats for a student's performance
+
+FileService:
+  - uploadFile(): Saves a file to the uploads/ directory with unique name
+  - downloadFile(): Reads and returns file bytes from disk
+
+--------------------------------------------------------------------------------
+4.6 CONTROLLER LAYER - ALL APIs EXPLAINED
+--------------------------------------------------------------------------------
+
+=== AuthController (/api/auth) ===
+
+POST /api/auth/login
+  Purpose: Authenticates a user and returns a JWT token
+  Request Body: { "email": "user@example.com", "password": "password123" }
+  Response: { "token": "eyJhbG...", "userId": 1, "name": "John", "email": "...",
+              "role": "STUDENT", "department": "CSE", "section": "A",
+              "rollNumber": "21CS001", "year": 3, "semester": 5, "phoneNumber": "9876543210" }
+  Auth Required: No
+  Used By: LoginPage.jsx
+
+POST /api/auth/forgot-password
+  Purpose: Resets a user's password without needing the old password
+  Request Body: { "email": "user@example.com", "newPassword": "newpass123" }
+  Response: { "message": "Password reset successfully" }
+  Auth Required: No
+
+POST /api/auth/change-password
+  Purpose: Changes password for logged-in user (requires old password)
+  Request Body: { "oldPassword": "current", "newPassword": "new123", "confirmPassword": "new123" }
+  Response: { "message": "Password changed successfully" }
+  Auth Required: Yes (JWT token in Authorization header)
+  Used By: ChangePassword.jsx component on all dashboards
+
+=== AdminController (/api/admin) - ADMIN ROLE ONLY ===
+
+GET /api/admin/users
+  Purpose: Returns all users in the system
+  Response: Array of user objects with id, name, email, role, department, etc.
+  Used By: AdminDashboard.jsx (faculty/students management tabs)
+
+POST /api/admin/users
+  Purpose: Creates a new user (student, faculty, or admin)
+  Request Body: { "name": "Jane", "email": "jane@rit.edu", "password": "pass123",
+                  "role": "STUDENT", "department": "CSE", "section": "A",
+                  "rollNumber": "21CS045", "year": 2, "semester": 3, "phoneNumber": "..." }
+  Response: Created user object
+  Used By: AdminDashboard.jsx "Add Faculty" / "Add Student" forms
+
+PUT /api/admin/users/{id}
+  Purpose: Updates an existing user's details
+  Request Body: Same as create (fields to update)
+  Response: Updated user object
+  Used By: AdminDashboard.jsx edit user modal
+
+GET /api/admin/users/role/{role}
+  Purpose: Gets all users with a specific role
+  URL Example: /api/admin/users/role/STUDENT
+  Response: Array of user objects
+  Used By: AdminDashboard.jsx to populate faculty and student lists
+
+PUT /api/admin/users/{id}/role
+  Purpose: Changes a user's role
+  Request Body: { "role": "INSTRUCTOR" }
+  Used By: AdminDashboard.jsx role management
+
+DELETE /api/admin/users/{id}
+  Purpose: Permanently deletes a user account
+  Response: { "message": "User deleted" }
+  Used By: AdminDashboard.jsx delete button in user tables
+
+POST /api/admin/allocate
+  Purpose: Assigns a course to a faculty member
+  Request Body: { "courseId": 1, "instructorId": 5 }
+  Response: { "message": "Course allocated" }
+  Used By: AdminDashboard.jsx Subject Allocation tab
+
+PUT /api/admin/assignments/{id}/deadline
+  Purpose: Extends an assignment's deadline
+  Request Body: { "deadline": "2026-04-15T23:59:00" }
+  Response: { "message": "Deadline extended" }
+  Used By: AdminDashboard.jsx Deadline Control tab
+
+GET /api/admin/stats
+  Purpose: Returns system-wide statistics
+  Response: { "totalStudents": 150, "totalInstructors": 20, "totalCourses": 45, ... }
+  Used By: AdminDashboard.jsx Database Tables / System Overview tab
+
+=== CourseController (/api/courses) ===
+
+GET /api/courses
+  Purpose: Returns all courses with summary info
+  Response: Array of { id, title, description, instructorName, moduleCount, studentCount }
+  Auth Required: No (public)
+  Used By: StudentDashboard.jsx browse tab, AdminDashboard.jsx
+
+GET /api/courses/{id}
+  Purpose: Returns full details of a single course
+  Response: CourseResponse with modules, quizzes, assignments
+  Used By: CoursePage.jsx
+
+GET /api/courses/search?keyword=
+  Purpose: Searches courses by title keyword
+  Used By: Search functionality
+
+GET /api/courses/instructor
+  Purpose: Returns courses owned by the logged-in instructor
+  Auth Required: INSTRUCTOR role
+  Used By: InstructorDashboard.jsx courses tab
+
+POST /api/courses
+  Purpose: Creates a new course
+  Request Body: { "title": "Data Structures", "description": "Learn DS" }
+  Auth Required: INSTRUCTOR role
+  Used By: InstructorDashboard.jsx create course form
+
+PUT /api/courses/{id}
+  Purpose: Updates course title/description
+  Auth Required: INSTRUCTOR role (must be owner)
+
+DELETE /api/courses/{id}
+  Purpose: Deletes a course and all its content
+  Auth Required: INSTRUCTOR role (must be owner)
+
+POST /api/courses/{courseId}/modules
+  Purpose: Adds a learning module to a course
+  Request Body: { "title": "Module 1: Arrays", "description": "...", "orderIndex": 1 }
+  Auth Required: INSTRUCTOR role
+  Used By: CoursePage.jsx module management
+
+GET /api/courses/{courseId}/modules
+  Purpose: Returns all modules for a course with their materials
+  Used By: CoursePage.jsx
+
+DELETE /api/courses/modules/{moduleId}
+  Purpose: Deletes a module and its materials
+  Auth Required: INSTRUCTOR role
+
+POST /api/courses/modules/{moduleId}/materials
+  Purpose: Adds a learning material to a module
+  Request Body: { "title": "Lecture Video", "type": "VIDEO", "url": "https://..." }
+  Auth Required: INSTRUCTOR role
+
+POST /api/courses/{courseId}/enroll
+  Purpose: Enrolls the logged-in student in a course
+  Auth Required: STUDENT role
+  Used By: StudentDashboard.jsx "Enroll Now" button
+
+DELETE /api/courses/{courseId}/enroll
+  Purpose: Unenrolls student from a course
+  Auth Required: STUDENT role
+
+GET /api/courses/{courseId}/enrolled
+  Purpose: Checks if current user is enrolled in a course
+  Response: { "enrolled": true/false }
+
+GET /api/courses/enrolled
+  Purpose: Returns all courses the student is enrolled in
+  Auth Required: STUDENT role
+  Used By: StudentDashboard.jsx "My Subjects" tab
+
+=== QuizController (/api/quizzes) ===
+
+POST /api/quizzes
+  Purpose: Creates a quiz with questions
+  Request Body: { "title": "Quiz 1", "courseId": 1, "timeLimit": 30,
+                  "passingScore": 60, "maxAttempts": 2,
+                  "questions": [{ "questionText": "What is...?", "type": "MCQ",
+                  "options": ["A","B","C","D"], "correctAnswer": "A", "points": 10 }] }
+  Auth Required: INSTRUCTOR role
+  Used By: CoursePage.jsx quiz creation form
+
+GET /api/quizzes/course/{courseId}
+  Purpose: Returns all quizzes for a course
+  Used By: CoursePage.jsx quiz list
+
+GET /api/quizzes/{id}
+  Purpose: Returns quiz details (answers hidden for students, visible for instructors)
+  Used By: QuizPage.jsx
+
+DELETE /api/quizzes/{id}
+  Purpose: Deletes a quiz
+  Auth Required: INSTRUCTOR role
+
+=== AssignmentController (/api/assignments) ===
+
+POST /api/assignments
+  Purpose: Creates a new assignment
+  Request Body: { "title": "Lab Report 1", "description": "...", "courseId": 1,
+                  "deadline": "2026-04-01T23:59:00", "totalMarks": 50 }
+  Auth Required: INSTRUCTOR role
+  Used By: CoursePage.jsx assignment creation
+
+GET /api/assignments/course/{courseId}
+  Purpose: Returns all assignments for a course
+  Used By: CoursePage.jsx
+
+GET /api/assignments/{id}
+  Purpose: Returns a single assignment's details
+
+DELETE /api/assignments/{id}
+  Purpose: Deletes an assignment
+  Auth Required: INSTRUCTOR role
+
+=== SubmissionController (/api/submissions) ===
+
+POST /api/submissions/quiz
+  Purpose: Submits quiz answers (auto-graded)
+  Request Body: { "quizId": 1, "answers": { "1": "A", "2": "True", "3": "HashMap" } }
+  Auth Required: STUDENT role
+  Used By: QuizPage.jsx submit button
+
+POST /api/submissions/assignment
+  Purpose: Submits an assignment
+  Request Body: { "assignmentId": 1, "content": "My answer...", "filePath": "file.pdf" }
+  Auth Required: STUDENT role
+  Used By: CoursePage.jsx assignment submission
+
+PUT /api/submissions/{id}/grade
+  Purpose: Instructor grades a submission
+  Request Body: { "score": 85, "feedback": "Good work" }
+  Auth Required: INSTRUCTOR role
+  Used By: InstructorDashboard.jsx grading interface
+
+GET /api/submissions/student
+  Purpose: Returns all submissions by the logged-in student
+  Auth Required: STUDENT role
+  Used By: StudentDashboard.jsx assignments tab
+
+GET /api/submissions/quiz/{quizId}
+  Purpose: Returns all submissions for a quiz (for grading)
+  Auth Required: INSTRUCTOR role
+
+GET /api/submissions/assignment/{assignmentId}
+  Purpose: Returns all submissions for an assignment
+  Auth Required: INSTRUCTOR role
+
+=== InternalMarkController (/api/internal-marks) ===
+
+GET /api/internal-marks/student
+  Purpose: Returns internal marks for the logged-in student
+  Response: Array of { courseTitle, exam1, exam2, exam3, attendance, total }
+  Used By: StudentDashboard.jsx "Internal Marks" tab
+
+GET /api/internal-marks/course/{courseId}
+  Purpose: Returns all student marks for a course
+  Used By: InstructorDashboard.jsx marks management
+
+POST /api/internal-marks/upload
+  Purpose: Creates/updates internal marks for a student
+  Request Body: { "studentId": 1, "courseId": 2, "exam1": 45, "exam2": 42, "exam3": 48, "attendance": 90 }
+  Used By: InstructorDashboard.jsx marks upload form
+
+DELETE /api/internal-marks/{id}
+  Purpose: Deletes a mark entry
+
+=== CourseMaterialController (/api/course-materials) ===
+
+POST /api/course-materials/upload
+  Purpose: Uploads a study material file (PDF, DOC, PPT, etc.)
+  Request: Multipart form with file, courseId, title, description
+  Auth Required: INSTRUCTOR role
+  Used By: InstructorDashboard.jsx materials upload
+
+GET /api/course-materials/course/{courseId}
+  Purpose: Returns all materials for a course
+  Response: Array of { id, title, description, originalFileName, storedFileName, fileSize, fileType, uploadedAt }
+  Used By: CoursePage.jsx, StudentDashboard.jsx
+
+GET /api/course-materials/instructor
+  Purpose: Returns all materials uploaded by the logged-in instructor
+  Auth Required: INSTRUCTOR role
+
+DELETE /api/course-materials/{id}
+  Purpose: Deletes a material (file + database record)
+  Auth Required: INSTRUCTOR role
+
+=== TimetableController (/api/timetable) ===
+
+GET /api/timetable
+  Purpose: Returns all timetable entries
+  Response: Array of { id, courseId, courseTitle, dayOfWeek, startTime, endTime, room, building }
+  Used By: StudentDashboard.jsx, InstructorDashboard.jsx timetable tabs
+
+GET /api/timetable/course/{courseId}
+  Purpose: Returns schedule for a specific course
+
+GET /api/timetable/day/{dayOfWeek}
+  Purpose: Returns all classes on a specific day (MONDAY, TUESDAY, etc.)
+
+POST /api/timetable
+  Purpose: Creates a timetable entry
+  Request Body: { "courseId": 1, "dayOfWeek": "MONDAY", "startTime": "09:00",
+                  "endTime": "10:00", "room": "301", "building": "Block A" }
+  Used By: AdminDashboard.jsx timetable scheduler
+
+DELETE /api/timetable/{id}
+  Purpose: Deletes a timetable entry
+
+=== SyllabusController (/api/syllabus) ===
+
+GET /api/syllabus/course/{courseId}
+  Purpose: Returns syllabus topics for a course
+  Response: Array of { id, courseTitle, topic, description, completed, completedDate, orderIndex }
+  Used By: InstructorDashboard.jsx syllabus tab
+
+GET /api/syllabus/course/{courseId}/progress
+  Purpose: Returns completion percentage
+  Response: { "total": 10, "completed": 7, "percentage": 70.0 }
+
+POST /api/syllabus
+  Purpose: Adds a syllabus topic
+  Request Body: { "courseId": 1, "topic": "Binary Trees", "description": "...", "orderIndex": 5 }
+
+PUT /api/syllabus/{id}/toggle
+  Purpose: Toggles a syllabus topic between completed/not completed
+
+DELETE /api/syllabus/{id}
+  Purpose: Deletes a syllabus topic
+
+=== EventController (/api/events) ===
+
+GET /api/events
+  Purpose: Returns all events
+  Auth Required: No (public)
+
+GET /api/events/upcoming
+  Purpose: Returns events with dates in the future, sorted ascending
+  Used By: StudentDashboard.jsx events tab and dashboard tiles
+
+POST /api/events
+  Purpose: Creates a new event
+  Request Body: { "title": "Tech Fest", "description": "...",
+                  "eventDate": "2026-04-20T10:00:00", "location": "Main Auditorium", "type": "CULTURAL" }
+  Used By: AdminDashboard.jsx
+
+DELETE /api/events/{id}
+  Purpose: Deletes an event
+
+=== AnnouncementController (/api/announcements) ===
+
+GET /api/announcements
+  Purpose: Returns all announcements
+  Auth Required: No (public)
+
+GET /api/announcements/role/{role}
+  Purpose: Returns announcements targeting a specific role or "ALL"
+  URL Example: /api/announcements/role/STUDENT
+  Used By: StudentDashboard.jsx announcements tab
+
+POST /api/announcements
+  Purpose: Creates an announcement
+  Request Body: { "title": "Exam Schedule", "content": "Mid-sems start...",
+                  "priority": "HIGH", "targetRole": "STUDENT" }
+  Used By: AdminDashboard.jsx
+
+DELETE /api/announcements/{id}
+  Purpose: Deletes an announcement
+
+=== AchievementController (/api/achievements) ===
+
+GET /api/achievements/student
+  Purpose: Returns achievements for the logged-in student
+  Used By: StudentDashboard.jsx achievements tab
+
+GET /api/achievements/student/{studentId}
+  Purpose: Returns achievements for a specific student (admin/instructor use)
+
+POST /api/achievements
+  Purpose: Awards an achievement to a student
+  Request Body: { "title": "Top Scorer", "description": "...", "icon": "🏆",
+                  "badge": "GOLD", "studentId": 1, "courseId": 2 }
+
+DELETE /api/achievements/{id}
+  Purpose: Removes an achievement
+
+=== SemesterCalendarController (/api/semester-calendar) ===
+
+GET /api/semester-calendar
+  Purpose: Returns all semester calendar entries
+  Used By: AdminDashboard.jsx calendar tab
+
+GET /api/semester-calendar/upcoming
+  Purpose: Returns future calendar entries
+
+POST /api/semester-calendar
+  Purpose: Creates a calendar entry
+  Request Body: { "title": "Mid-Semester Exams", "description": "...",
+                  "date": "2026-04-15", "type": "EXAM" }
+
+DELETE /api/semester-calendar/{id}
+  Purpose: Deletes a calendar entry
+
+=== AnalyticsController (/api/analytics) ===
+
+GET /api/analytics/instructor
+  Purpose: Returns analytics for the logged-in instructor
+  Auth Required: INSTRUCTOR role
+  Used By: InstructorDashboard.jsx
+
+GET /api/analytics/student
+  Purpose: Returns analytics for the logged-in student
+  Auth Required: STUDENT role
+  Used By: StudentDashboard.jsx
+
+=== FileController (/api/files) ===
+
+POST /api/files/upload
+  Purpose: Uploads any file to the server
+  Request: Multipart form with "file" field
+  Response: { "fileName": "uuid_original.pdf", "originalName": "report.pdf", "size": "1024" }
+  Used By: Assignment submissions, material uploads
+
+GET /api/files/{fileName}
+  Purpose: Downloads/serves a file
+  Response: File bytes with appropriate content type (PDF, PNG, JPG, etc.)
+  Auth Required: No (public - files served by stored name)
+
+=== GlobalExceptionHandler ===
+
+Not an API endpoint but handles all errors globally:
+  - RuntimeException: Returns 400 with error message
+  - MethodArgumentNotValidException: Returns 400 with field-level validation errors
+  - Exception (generic): Returns 500 with "Internal server error"
+
+================================================================================
+5. FRONTEND EXPLANATION
+================================================================================
+
+--------------------------------------------------------------------------------
+5.1 ENTRY POINT & ROUTING (App.jsx, main.jsx)
+--------------------------------------------------------------------------------
+
+main.jsx:
+  - Entry point of the React application
+  - Wraps the app in BrowserRouter (for routing), AuthProvider (for auth state),
+    and ThemeProvider (for dark/light mode)
+
+App.jsx:
+  - Defines all application routes using React Router
+  - ProtectedRoute component: Checks if user is logged in and has correct role
+    before allowing access. Redirects to /login if not authenticated.
+
+  Routes:
+    /               --> Redirects to /login
+    /login          --> LoginPage (redirects to dashboard if already logged in)
+    /admin          --> AdminDashboard (ADMIN only)
+    /student        --> StudentDashboard (STUDENT only)
+    /instructor     --> InstructorDashboard (INSTRUCTOR only)
+    /course/:id     --> CoursePage (any authenticated user)
+    /quiz/:id       --> QuizPage (STUDENT only)
+    /results        --> ResultsPage (any authenticated user)
+    /*              --> Redirects to /login (404 catch-all)
+
+--------------------------------------------------------------------------------
+5.2 CONTEXT PROVIDERS
+--------------------------------------------------------------------------------
+
+AuthContext.jsx:
+  - Creates a React Context for authentication state
+  - On app load, checks localStorage for saved token and user data
+  - Provides: user (current user object), token, loading, login(), logout()
+  - login(): Saves token + user to state and localStorage
+  - logout(): Clears token + user from state and localStorage
+  - Helper booleans: isInstructor, isStudent, isAdmin
+
+ThemeContext.jsx:
+  - Manages dark/light mode toggle
+  - On load, checks localStorage for saved preference, defaults to system preference
+  - Adds/removes "dark" class on <html> element
+  - Provides: isDark (boolean), toggleTheme (function)
+
+--------------------------------------------------------------------------------
+5.3 API SERVICE LAYER (services/api.js)
+--------------------------------------------------------------------------------
+
+Creates an Axios instance with baseURL "/api" (proxied to localhost:8080 by Vite).
+
+Request Interceptor: Automatically attaches JWT token from localStorage
+to every request as "Authorization: Bearer <token>".
+
+Response Interceptor: If any API returns 401 (Unauthorized), automatically
+clears localStorage and redirects to /login.
+
+Exports 13 API modules:
+  authAPI (3 methods), courseAPI (13 methods), quizAPI (4 methods),
+  assignmentAPI (4 methods), submissionAPI (6 methods), fileAPI (2 methods),
+  analyticsAPI (2 methods), internalMarkAPI (4 methods), achievementAPI (4 methods),
+  eventAPI (4 methods), announcementAPI (4 methods), timetableAPI (5 methods),
+  syllabusAPI (5 methods), semesterCalendarAPI (4 methods),
+  adminAPI (9 methods), courseMaterialAPI (5 methods)
+
+Total: 74 API methods mapping to backend endpoints.
+
+--------------------------------------------------------------------------------
+5.4 COMPONENTS
+--------------------------------------------------------------------------------
+
+DashboardLayout.jsx:
+  - The main layout wrapper for all dashboard pages
+  - Contains: Sidebar (left), Header (top), Content area, Footer
+  - SIDEBAR: Dark-themed (#2D3139), contains:
+      Logo + college name (Rajalakshmi Institute of Technology)
+      Search bar
+      Menu items organized by category (MAIN, MENU, SETTINGS)
+      Menu items change based on user role
+      Active item highlighted with blue background
+      Logout button at bottom
+      Collapsible (slides in/out with toggle button)
+  - HEADER: Contains:
+      Sidebar toggle button (chevron icon)
+      Breadcrumb showing role / current page
+      Dark mode toggle (sun/moon icon)
+      User info (name, role badge, avatar initial)
+  - FOOTER: Copyright text + "RIT-IMS VER 2.0" branding
+  - Student sidebar items: Dashboard, Student Detail, Subjects, Internal Marks,
+    Assignment, Achievements, Events, Announcements, Timetable, Change Password
+  - Faculty sidebar items: Dashboard, Courses, Internal Marks, Study Materials,
+    Syllabus, Timetable, Change Password
+  - Admin sidebar items: Dashboard, Manage Faculty, Manage Students,
+    Subject Allocation, Timetable Scheduler, Semester Calendar,
+    Deadline Control, Database Tables, Change Password
+
+Navbar.jsx:
+  - Navigation bar for public pages (login, landing)
+  - Contains logo, navigation links, dark mode toggle
+  - Responsive hamburger menu for mobile
+
+Calendar.jsx:
+  - Reusable calendar widget component
+  - Displays a monthly grid with 7 columns (Mon-Sun)
+  - Highlights today's date
+  - Can display events on specific dates
+  - Navigation arrows for previous/next month
+
+ChangePassword.jsx:
+  - Reusable password change form
+  - Fields: Current Password, New Password, Confirm New Password
+  - Validates new password matches confirmation
+  - Validates minimum 6 characters
+  - Calls authAPI.changePassword() on submit
+  - Shows success/error messages
+  - Used on all three dashboards (student, faculty, admin) under "settings" tab
+
+--------------------------------------------------------------------------------
+5.5 PAGES - EVERY UI ELEMENT EXPLAINED
+--------------------------------------------------------------------------------
+
+=== LoginPage.jsx ===
+  - Glassmorphism card centered on screen
+  - Gradient blur circles in background for visual flair
+  - Book icon in gradient square
+  - "Welcome Back" heading
+  - "Sign in to your LMS account" subheading
+  - Email input field (required, email validation)
+  - Password input field (required, min 6 chars)
+  - "Sign In" button (gradient blue, shows spinner when loading)
+  - Error message display (red banner if login fails)
+  - On success: Redirects to role-based dashboard
+
+=== LandingPage.jsx ===
+  - Public page (currently redirected past via App.jsx)
+  - Hero section with college branding
+  - Feature highlights
+  - Call to action buttons
+
+=== StudentDashboard.jsx ===
+  Tab: dashboard (default)
+    - Welcome header with student name
+    - Department badge + roll number
+    - 8 interactive tile cards in a grid:
+        Student Detail (red), Subjects (blue), Internal Marks (red),
+        Assignment (red), Achievements (blue), Events (purple),
+        Announcements (orange), Timetable (cyan)
+    - Each tile has icon, label, hover animation (lift + scale)
+    - "Today's Schedule" card showing next 3 classes
+    - "Upcoming Events" card showing next 3 events
+
+  Tab: profile (Student Detail)
+    - Large profile card with glassmorphism
+    - Avatar with gradient background showing first initial
+    - Header: Student name + "Student Profile - Verified"
+    - 7 detail fields in 2-column grid:
+        Student Name, Roll Number, Email Address, Department,
+        Current Year, Current Semester, Phone Number
+
+  Tab: courses (Subjects)
+    - "My Subjects" heading with "Browse More" button
+    - Grid of enrolled course cards
+    - Each card shows: book icon, module count badge, title, instructor name
+    - Click navigates to full course page
+    - Empty state: "No enrolled subjects yet"
+
+  Tab: browse
+    - "Browse Subjects" heading with back button
+    - Grid of available (unenrolled) courses
+    - Each card has "Enroll Now" button
+
+  Tab: marks (Internal Marks)
+    - "Internal Marks" heading
+    - Full-width table with columns: Subject, Exam 1, Exam 2, Exam 3, Total
+    - Each row shows marks per course
+    - Total shown in blue/bold
+    - Empty state: "No internal marks published yet"
+
+  Tab: assignments (Assignment)
+    - "Assignment Portal" heading
+    - List of submitted assignments
+    - Each card shows: title, submission date, grade (if graded) or "Pending"
+    - Red left border on each card
+    - Score displayed in red-themed box
+
+  Tab: achievements (Achievements)
+    - "My Achievements" heading with trophy emoji
+    - Grid of achievement cards (2x4 on desktop)
+    - Each card: large icon (60px), title, badge level (GOLD/SILVER/BRONZE)
+    - Badge color coded: gold=yellow, silver=gray, bronze=amber
+    - Blue bottom border accent
+
+  Tab: events + announcement
+    - Two-column layout
+    - LEFT: Announcements section (orange themed)
+      Each announcement: title, content, created by, date
+      Orange left border, orange tinted background
+    - RIGHT: Upcoming Events (purple themed)
+      Each event: date badge (month + day), title, type + location
+      Purple left border, purple tinted background
+
+  Tab: timetable
+    - "My Timetable" heading with calendar emoji
+    - Vertical list of class entries
+    - Each entry shows: day abbreviation (MON, TUE...), course title,
+      time range, room number
+    - Sorted by day of week
+    - Hover effect: blue border highlight
+
+  Tab: settings
+    - Renders ChangePassword component
+
+=== InstructorDashboard.jsx ===
+  - Full faculty portal with tabs for:
+    courses, marks, materials, syllabus, timetable, settings
+  - Course management: Create courses, add modules, add materials,
+    create quizzes with questions, create assignments
+  - Marks: View enrolled students, upload exam1/exam2/exam3/attendance marks
+  - Materials: Upload PDFs/docs, view uploaded files, delete materials
+  - Syllabus: Add topics, toggle completion, view progress percentage
+  - Timetable: View teaching schedule
+  - Settings: Change password
+
+=== AdminDashboard.jsx ===
+  - Full admin control panel with tabs for:
+    faculty, students, allocation, timetable, calendar, deadlines, stats, settings
+  - Faculty Management: Add/edit/delete faculty with department info
+  - Student Management: Add/edit/delete students with rollNumber, year, semester, section, phone
+  - Subject Allocation: Assign courses to faculty
+  - Timetable Scheduler: Create class schedules with day/time/room/building
+  - Semester Calendar: Add academic events (exams, holidays, festivals)
+    with calendar component visualization
+  - Deadline Control: View all assignments, extend deadlines
+  - Database Tables: System statistics (total students, faculty, courses, quizzes, etc.)
+    Plus create announcements, events
+  - Settings: Change password
+
+=== CoursePage.jsx ===
+  - Detailed view of a single course
+  - Course header: title, description, instructor name
+  - Enrollment status + enroll/unenroll button
+  - Modules section: expandable list of modules with materials
+  - Quizzes section: list of available quizzes with "Start Quiz" button
+  - Assignments section: list of assignments with submission forms
+  - Study Materials: downloadable files
+  - For instructors: additional forms to create modules, quizzes, assignments
+
+=== QuizPage.jsx ===
+  - Quiz taking interface (students only)
+  - Shows quiz title, time limit, total questions
+  - Timer countdown in header
+  - Questions displayed one at a time or all at once
+  - MCQ: Radio buttons for options
+  - True/False: Two radio buttons
+  - Short Answer: Text input
+  - "Submit Quiz" button
+  - Auto-submits when timer expires
+  - Results shown after submission with score
+
+=== ResultsPage.jsx ===
+  - Grade book / results view
+  - Shows all quiz and assignment submission history
+  - For students: personal grades
+  - For instructors: view all student submissions, grade them
+  - Table showing: quiz/assignment title, student name, score, status, date
+
+================================================================================
+6. HOW TO RUN THE PROJECT
+================================================================================
+
+Prerequisites:
+  - Java 17 or higher (JDK)
+  - Node.js 18 or higher (with npm)
+  - MySQL 8+ running on port 3306
+
+Step 1: Create MySQL Database
+  - Database "lms_db" is auto-created by Spring Boot
+  - Username: root
+  - Password: viki0812N@
+
+Step 2: Start Backend
+  cd lms-backend
+  .\mvnw.cmd spring-boot:run
+  (Runs on http://localhost:8080)
+
+Step 3: Start Frontend
+  cd lms-frontend
+  npm run dev
+  (Runs on http://localhost:5173)
+
+Step 4: Open browser at http://localhost:5173/login
+
+================================================================================
+7. DATABASE CONFIGURATION (application.properties)
+================================================================================
+
+Server Port: 8080
+MySQL URL: jdbc:mysql://localhost:3306/lms_db
+MySQL Username: root
+MySQL Password: viki0812N@
+JPA DDL Auto: update (auto-creates/updates tables)
+JWT Secret: LMS_SUPER_SECRET_KEY_2026_CHANGE_IN_PRODUCTION_MIN_256_BITS_LONG_ENOUGH
+JWT Expiration: 86400000 ms (24 hours)
+File Upload Max: 50MB
+Upload Directory: uploads/
+CORS Allowed Origin: http://localhost:5173
+
+================================================================================
+                              END OF DOCUMENTATION
+================================================================================
