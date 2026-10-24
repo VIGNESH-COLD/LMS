@@ -1,67 +1,42 @@
-# RIT Learning Management System (LMS)
+# Learning Management System (LMS)
 
-A comprehensive Learning Management System built with a Spring Boot Java backend and a React/Vite frontend. This application provides a full-featured platform for educational institutions to manage courses, users, materials, and evaluations.
+A web-based Learning Management System built with **Spring Boot, React, and MySQL/PostgreSQL** to simplify academic management and improve communication between students and faculty.
 
-##  Features
+## Features
+- Role-based dashboards for students, instructors, and administrators.
+- Course and learning material management.
+- Assignment submissions, quizzes, and grading.
+- Internal marks tracking.
+- AI chatbot powered by Mistral AI.
+- Announcements, academic calendars, and student achievements.
 
-- **Role-Based Access Control**: Separate, customized dashboards for Students, Instructors, and Administrators.
-- **Course Management**: Manage courses, sections, syllabus, and course materials (documents, videos, images).
-- **Assessment & Evaluation**:
-  - Assignments with file submissions and grading.
-  - Quizzes with automated scoring.
-  - Internal marks tracking.
-- **AI Chatbot Integration**: Integrated Mistral AI chatbot service to assist students and staff.
-- **Communication Tools**: System-wide announcements and shared calendars for events and timetables.
-- **Student Engagement**: Track student achievements.
+## Tech Stack
+- **Backend:** Java, Spring Boot, Spring Data JPA, Spring Security
+- **Frontend:** React.js, Vite, Tailwind CSS
+- **Database:** MySQL / PostgreSQL
 
-## Technology Stack
-
-**Backend (`/lms-backend`)**:
-- Java Spring Boot
-- Spring Data JPA (Hibernate)
-- Spring Security for Authentication
-- MySQL / PostgreSQL (Configured via `application.properties`)
-
-**Frontend (`/lms-frontend`)**:
-- React.js
-- Vite (Build Tool)
-- Tailwind CSS (Styling)
+## Project Impact
+- Centralizes academic resources and activities on a single platform.
+- Simplifies assignment management, assessments, and communication.
+- Provides AI-assisted support for student queries.
 
 ## Getting Started
 
-### Prerequisites
-- JDK 17+
-- Node.js & npm
-- Maven
-- MySQL / PostgreSQL Database
+**Backend**
+```bash
+cd lms-backend
+./mvnw spring-boot:run
+```
 
-### 1. Setting up the Backend
-1. Navigate to the `lms-backend` directory:
-   ```bash
-   cd lms-backend
-   ```
-2. Update your database configuration in `src/main/resources/application.properties`.
-3. Run the application:
-   ```bash
-   .\mvnw spring-boot:run
-   ```
-   *(The backend server will typically start on `http://localhost:8080`)*
+**Frontend**
+```bash
+cd lms-frontend
+npm install
+npm run dev
+```
 
-### 2. Setting up the Frontend
-1. Navigate to the `lms-frontend` directory:
-   ```bash
-   cd lms-frontend
-   ```
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
-3. Start the development server:
-   ```bash
-   npm run dev
-   ```
-   *(The frontend will typically be accessible at `http://localhost:5173`)*
+Configure your database settings in `application.properties` before starting the backend.
 
-## Default Login Credentials
-*(If populated by your initialization scripts)*
-- **Admin**: `admin@lms.edu` / `admin123`
+**Local URLs:**
+- Frontend: `http://localhost:5173`
+- Backend: `http://localhost:8080`
