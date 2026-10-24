@@ -2,7 +2,7 @@
 
 A comprehensive Learning Management System built with a Spring Boot Java backend and a React/Vite frontend. This application provides a full-featured platform for educational institutions to manage courses, users, materials, and evaluations.
 
-## 🚀 Features
+##  Features
 
 - **Role-Based Access Control**: Separate, customized dashboards for Students, Instructors, and Administrators.
 - **Course Management**: Manage courses, sections, syllabus, and course materials (documents, videos, images).
@@ -14,7 +14,7 @@ A comprehensive Learning Management System built with a Spring Boot Java backend
 - **Communication Tools**: System-wide announcements and shared calendars for events and timetables.
 - **Student Engagement**: Track student achievements.
 
-## 🛠️ Technology Stack
+## Technology Stack
 
 **Backend (`/lms-backend`)**:
 - Java Spring Boot
@@ -27,7 +27,7 @@ A comprehensive Learning Management System built with a Spring Boot Java backend
 - Vite (Build Tool)
 - Tailwind CSS (Styling)
 
-## 📦 Getting Started
+## Getting Started
 
 ### Prerequisites
 - JDK 17+
@@ -62,9 +62,6 @@ A comprehensive Learning Management System built with a Spring Boot Java backend
    ```
    *(The frontend will typically be accessible at `http://localhost:5173`)*
 
-## 🔑 Default Login Credentials
+## Default Login Credentials
 *(If populated by your initialization scripts)*
 - **Admin**: `admin@lms.edu` / `admin123`
-
----
-*Created for the RIT LMS Project.*
