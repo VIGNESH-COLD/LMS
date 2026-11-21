@@ -1,16 +1,17 @@
 import { Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import { BookOpen, FileText, BarChart2, ShieldCheck, Folder, Bot } from 'lucide-react'
 
 export default function LandingPage() {
   const { user } = useAuth()
 
   const features = [
-    { icon: '📚', title: 'Course Management', desc: 'Create and organize courses with modules, materials, PDFs, and video links.' },
-    { icon: '📝', title: 'Assessments', desc: 'Build MCQ quizzes and assignments with auto-grading and deadline tracking.' },
-    { icon: '📊', title: 'Analytics', desc: 'Track student performance with detailed score reports and insights.' },
-    { icon: '🔒', title: 'Secure Access', desc: 'Role-based authentication for admins, faculty, and students.' },
-    { icon: '📁', title: 'File Uploads', desc: 'Upload PDFs, documents, and link videos to your course content.' },
-    { icon: '🤖', title: 'AI-Ready', desc: 'Scalable architecture designed for future AI-based learning analytics.' },
+    { icon: BookOpen, title: 'Course Management', desc: 'Create and organize courses with modules, materials, PDFs, and video links.' },
+    { icon: FileText, title: 'Assessments', desc: 'Build MCQ quizzes and assignments with auto-grading and deadline tracking.' },
+    { icon: BarChart2, title: 'Analytics', desc: 'Track student performance with detailed score reports and insights.' },
+    { icon: ShieldCheck, title: 'Secure Access', desc: 'Role-based authentication for admins, faculty, and students.' },
+    { icon: Folder, title: 'File Uploads', desc: 'Upload PDFs, documents, and link videos to your course content.' },
+    { icon: Bot, title: 'AI-Ready', desc: 'Scalable architecture designed for future AI-based learning analytics.' },
   ]
 
   return (
@@ -93,7 +94,7 @@ export default function LandingPage() {
               <div key={feature.title}
                 className="glass-card-hover p-6 animate-slide-up"
                 style={{animationDelay: `${i * 0.1}s`}}>
-                <div className="text-4xl mb-4">{feature.icon}</div>
+                <div className="mb-4 text-primary-500"><feature.icon className="w-8 h-8" /></div>
                 <h3 className="text-lg font-semibold text-heading mb-2">{feature.title}</h3>
                 <p className="text-gray-500 dark:text-surface-400 text-sm leading-relaxed">{feature.desc}</p>
               </div>

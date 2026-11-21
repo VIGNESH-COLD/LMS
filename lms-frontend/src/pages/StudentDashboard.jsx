@@ -5,7 +5,7 @@ import { courseAPI, submissionAPI, analyticsAPI, internalMarkAPI, achievementAPI
 import Calendar from '../components/Calendar'
 import ChangePassword from '../components/ChangePassword'
 import SharedTimetableTab from '../components/SharedTimetableTab'
-import { User, BookOpen, FileEdit, Trophy, Target, Megaphone, Calendar as CalendarIcon } from 'lucide-react'
+import { User, BookOpen, FileEdit, Trophy, Target, Megaphone, Calendar as CalendarIcon, ClipboardList } from 'lucide-react'
 import AchievementsTab from '../components/AchievementsTab'
 
 export default function StudentDashboard() {
@@ -96,19 +96,18 @@ export default function StudentDashboard() {
   const sortedTimetables = [...myTimetables].sort((a,b) => (dayOrder[a.dayOfWeek] || 99) - (dayOrder[b.dayOfWeek] || 99))
 
   const getFileIcon = (type) => {
-    const icons = { pdf: '📄', doc: '📝', docx: '📝', ppt: '📊', pptx: '📊', xls: '📈', xlsx: '📈', png: '🖼️', jpg: '🖼️', jpeg: '🖼️', zip: '📦', mp4: '🎬', mp3: '🎵' }
-    return icons[type] || '📎'
+    return (type || 'FILE').toUpperCase().slice(0, 4)
   }
 
   const studentModules = [
-    { id: 'profile', label: 'Student Detail', icon: '👤', color: 'text-red-700' },
-    { id: 'courses', label: 'Subjects', icon: '📚', color: 'text-blue-600' },
-    { id: 'marks', label: 'Internal Marks', icon: '✒️', color: 'text-red-600' },
-    { id: 'assignments', label: 'Assignment', icon: '📝', color: 'text-amber-600' },
-    { id: 'achievements', label: 'Achievements', icon: '🏆', color: 'text-blue-600' },
-    { id: 'events', label: 'Events', icon: '🎯', color: 'text-purple-500' },
-    { id: 'announcement', label: 'Announcements', icon: '📢', color: 'text-orange-500' },
-    { id: 'timetable', label: 'Timetable', icon: '📅', color: 'text-cyan-600' },
+    { id: 'profile', label: 'Student Detail', icon: User, color: 'text-red-700' },
+    { id: 'courses', label: 'Subjects', icon: BookOpen, color: 'text-blue-600' },
+    { id: 'marks', label: 'Internal Marks', icon: FileEdit, color: 'text-red-600' },
+    { id: 'assignments', label: 'Assignment', icon: ClipboardList, color: 'text-amber-600' },
+    { id: 'achievements', label: 'Achievements', icon: Trophy, color: 'text-blue-600' },
+    { id: 'events', label: 'Events', icon: Target, color: 'text-purple-500' },
+    { id: 'announcement', label: 'Announcements', icon: Megaphone, color: 'text-orange-500' },
+    { id: 'timetable', label: 'Timetable', icon: CalendarIcon, color: 'text-cyan-600' },
   ]
 
   return (
@@ -137,8 +136,8 @@ export default function StudentDashboard() {
                   to={`?tab=${module.id}`}
                   className="bg-white dark:bg-white/5 border border-gray-100 dark:border-white/10 rounded-xl p-6 flex flex-col items-center justify-center text-center hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group"
                 >
-                  <div className={`text-4xl mb-4 transform group-hover:scale-110 transition-transform ${module.color}`}>
-                    {module.icon}
+                  <div className={`mb-4 transform group-hover:scale-110 transition-transform ${module.color}`}>
+                    <module.icon className="w-8 h-8" />
                   </div>
                   <span className="text-sm font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wide">
                     {module.label}
@@ -207,8 +206,8 @@ export default function StudentDashboard() {
               ) : courses.map(course => (
                 <Link key={course.id} to={`/course/${course.id}`} className="glass-card-hover p-6 block text-left">
                   <div className="flex items-start justify-between mb-3">
-                    <div className="w-12 h-12 bg-gradient-to-br from-primary-500 to-accent-500 rounded-xl flex items-center justify-center text-xl">
-                      📖
+                    <div className="w-12 h-12 bg-gradient-to-br from-primary-500 to-accent-500 rounded-xl flex items-center justify-center">
+                      <BookOpen className="w-6 h-6 text-white" />
                     </div>
                     <span className="badge-primary">{course.moduleCount} modules</span>
                   </div>
@@ -261,7 +260,9 @@ export default function StudentDashboard() {
         {tab === 'events' || tab === 'announcement' && (
           <div className="grid md:grid-cols-2 gap-8">
             <div className="glass-card p-6">
-              <h2 className="section-title text-center text-orange-500">📢 Announcements</h2>
+              <h2 className="section-title text-center text-orange-500 flex items-center justify-center gap-2">
+                <Megaphone className="w-5 h-5" /> Announcements
+              </h2>
               <div className="space-y-4 mt-6">
                 {announcements.length === 0 ? <p className="text-sub text-center italic">No public announcements.</p> : announcements.map(a => (
                   <div key={a.id} className="p-4 rounded-xl border-l-4 border-orange-500 bg-orange-50/30 dark:bg-orange-950/10">
@@ -273,7 +274,9 @@ export default function StudentDashboard() {
               </div>
             </div>
             <div className="glass-card p-6">
-              <h2 className="section-title text-center text-purple-500">🎯 Upcoming Events</h2>
+              <h2 className="section-title text-center text-purple-500 flex items-center justify-center gap-2">
+                <Target className="w-5 h-5" /> Upcoming Events
+              </h2>
               <div className="space-y-4 mt-6">
                 {events.length === 0 ? <p className="text-sub text-center italic">No upcoming events listed.</p> : events.map(e => (
                   <div key={e.id} className="p-4 rounded-xl border-l-4 border-purple-500 bg-purple-50/30 dark:bg-purple-950/10 flex space-x-4">

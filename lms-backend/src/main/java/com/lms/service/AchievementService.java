@@ -56,7 +56,7 @@ public class AchievementService {
                 .certificateFileName(certificateFileName)
                 .academicYear(academicYear)
                 .eventDate(eventDate)
-                .icon("🏆")
+                .icon("")
                 .badge("GOLD")
                 .student(student)
                 .submittedByStudent(true)

@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { achievementAPI, fileAPI } from '../services/api'
+import { Award, Trophy, GraduationCap, Palette, Users, Laptop, CheckCircle, AlertTriangle, Info, FileText, Trash2 } from 'lucide-react'
 
 const ACADEMIC_YEARS = ['2020-2021', '2021-2022', '2022-2023', '2023-2024', '2024-2025', '2025-2026', '2026-2027']
 const AWARD_TYPES = ['Academic', 'Sports', 'Cultural', 'Technical', 'Social Service', 'Arts', 'Other']
@@ -20,14 +21,16 @@ const LEVEL_COLORS = {
   College:       'from-gray-400 to-gray-600',
 }
 
-const AWARD_ICONS = {
-  Academic:       '🎓',
-  Sports:         '🏅',
-  Cultural:       '🎭',
-  Technical:      '💻',
-  'Social Service':'🤝',
-  Arts:           '🎨',
-  Other:          '🏆',
+const renderAwardIcon = (type) => {
+  switch (type) {
+    case 'Academic': return <GraduationCap className="w-5 h-5 text-white" />
+    case 'Sports': return <Trophy className="w-5 h-5 text-white" />
+    case 'Cultural': return <Palette className="w-5 h-5 text-white" />
+    case 'Technical': return <Laptop className="w-5 h-5 text-white" />
+    case 'Social Service': return <Users className="w-5 h-5 text-white" />
+    case 'Arts': return <Palette className="w-5 h-5 text-white" />
+    default: return <Award className="w-5 h-5 text-white" />
+  }
 }
 
 export default function AchievementsTab({ achievements, onSubmit }) {
@@ -119,7 +122,9 @@ export default function AchievementsTab({ achievements, onSubmit }) {
       {/* Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-xl font-black text-heading">🏆 My Achievements</h2>
+          <h2 className="text-xl font-black text-heading flex items-center gap-2">
+            <Trophy className="w-6 h-6 text-amber-500" /> My Achievements
+          </h2>
           <p className="text-xs text-muted mt-1">Submit and track your academic & extracurricular achievements</p>
         </div>
         <button
@@ -128,14 +133,14 @@ export default function AchievementsTab({ achievements, onSubmit }) {
                      bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700
                      shadow-lg shadow-blue-500/20 hover:shadow-blue-500/40 transition-all duration-200 hover:-translate-y-0.5"
         >
-          {showForm ? '✕ Cancel' : '＋ Submit Achievement'}
+          {showForm ? 'Cancel' : '+ Submit Achievement'}
         </button>
       </div>
 
       {/* Success Banner */}
       {success && (
         <div className="flex items-center gap-3 p-4 rounded-xl bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 text-green-700 dark:text-green-400 text-sm font-medium">
-          <span className="text-lg">✅</span> {success}
+          <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0" /> {success}
         </div>
       )}
 
@@ -144,7 +149,7 @@ export default function AchievementsTab({ achievements, onSubmit }) {
         <div className="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-2xl shadow-xl overflow-hidden">
           {/* Form Header */}
           <div className="flex items-center gap-3 px-6 py-4 bg-gradient-to-r from-teal-500 to-cyan-500 text-white">
-            <span className="text-xl">ℹ️</span>
+            <Info className="w-5 h-5 flex-shrink-0" />
             <span className="font-bold text-sm tracking-wide">Achievements</span>
           </div>
 
@@ -304,7 +309,7 @@ export default function AchievementsTab({ achievements, onSubmit }) {
             {/* Error */}
             {error && (
               <div className="flex items-center gap-2 p-3 rounded-xl bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 text-sm">
-                <span>⚠️</span> {error}
+                <AlertTriangle className="w-4 h-4 text-red-500 flex-shrink-0" /> {error}
               </div>
             )}
 
@@ -337,7 +342,7 @@ export default function AchievementsTab({ achievements, onSubmit }) {
       {/* Achievements List */}
       {achievements.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-20 glass-card text-center">
-          <div className="text-6xl mb-4">🏅</div>
+          <Trophy className="w-16 h-16 text-gray-400 mb-4" />
           <h3 className="text-lg font-bold text-heading mb-2">No Achievements Yet</h3>
           <p className="text-sm text-muted max-w-sm">
             Submit your first achievement using the button above. Your submissions will appear here after review.
@@ -348,7 +353,6 @@ export default function AchievementsTab({ achievements, onSubmit }) {
           {achievements.map(a => {
             const st = STATUS_STYLES[a.status] || STATUS_STYLES.PENDING
             const grad = LEVEL_COLORS[a.academicLevel] || 'from-gray-400 to-gray-600'
-            const icon = AWARD_ICONS[a.awardType] || '🏆'
             const certUrl = a.certificateFileName ? fileAPI.getUrl(a.certificateFileName) : null
             return (
               <div key={a.id}
@@ -360,8 +364,8 @@ export default function AchievementsTab({ achievements, onSubmit }) {
                   {/* Header row */}
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex items-center gap-3">
-                      <div className={`w-11 h-11 rounded-xl bg-gradient-to-br ${grad} flex items-center justify-center text-2xl shadow-md flex-shrink-0`}>
-                        {icon}
+                      <div className={`w-11 h-11 rounded-xl bg-gradient-to-br ${grad} flex items-center justify-center shadow-md flex-shrink-0`}>
+                        {renderAwardIcon(a.awardType)}
                       </div>
                       <div className="min-w-0">
                         <h3 className="text-sm font-bold text-heading leading-snug line-clamp-2">{a.title}</h3>
@@ -414,7 +418,7 @@ export default function AchievementsTab({ achievements, onSubmit }) {
                         onClick={() => setPreviewImg(certUrl)}
                         className="flex items-center gap-1.5 text-xs text-blue-600 dark:text-blue-400 font-semibold hover:underline"
                       >
-                        📄 View Certificate
+                        <FileText className="w-3.5 h-3.5" /> View Certificate
                       </button>
                     ) : (
                       <span className="text-xs text-muted italic">No certificate</span>
@@ -422,17 +426,17 @@ export default function AchievementsTab({ achievements, onSubmit }) {
                     {a.status === 'PENDING' && (
                       <button
                         onClick={() => handleDelete(a.id)}
-                        className="text-xs text-red-500 hover:text-red-700 font-semibold transition-colors px-2 py-1 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20"
+                        className="flex items-center gap-1 text-xs text-red-500 hover:text-red-700 font-semibold transition-colors px-2 py-1 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20"
                       >
-                        🗑 Delete
+                        <Trash2 className="w-3.5 h-3.5" /> Delete
                       </button>
                     )}
                   </div>
 
                   {/* Rejection note */}
                   {a.status === 'REJECTED' && (
-                    <div className="text-[11px] text-red-500 dark:text-red-400 bg-red-50 dark:bg-red-900/20 rounded-xl px-3 py-2">
-                      ⚠️ This submission was rejected. Please review and resubmit if needed.
+                    <div className="flex items-center gap-1 text-[11px] text-red-500 dark:text-red-400 bg-red-50 dark:bg-red-900/20 rounded-xl px-3 py-2">
+                      <AlertTriangle className="w-3.5 h-3.5 flex-shrink-0" /> This submission was rejected. Please review and resubmit if needed.
                     </div>
                   )}
                 </div>
@@ -452,7 +456,7 @@ export default function AchievementsTab({ achievements, onSubmit }) {
             <button
               onClick={() => setPreviewImg(null)}
               className="absolute -top-4 -right-4 w-9 h-9 rounded-full bg-white text-gray-900 font-bold text-lg flex items-center justify-center shadow-xl hover:bg-gray-100 z-10"
-            >✕</button>
+            >&times;</button>
             <img
               src={previewImg}
               alt="Certificate"

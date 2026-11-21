@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { courseAPI, quizAPI, assignmentAPI, submissionAPI, fileAPI } from '../services/api'
+import { BookOpen, FileText } from 'lucide-react'
 
 export default function CoursePage() {
   const { id } = useParams()
@@ -236,7 +237,7 @@ export default function CoursePage() {
               <button onClick={handleEnroll} className="btn-primary">Enroll in Course</button>
             )}
             {isStudent && enrolled && (
-              <span className="badge-success text-sm py-2 px-4">✓ Enrolled</span>
+              <span className="badge-success text-sm py-2 px-4">Enrolled</span>
             )}
             {isOwner && (
               <button onClick={() => setShowAddModule(true)} className="btn-primary text-sm">+ Add Module</button>
@@ -251,7 +252,7 @@ export default function CoursePage() {
           <h2 className="section-title">Course Content</h2>
           {course.modules?.length === 0 ? (
             <div className="glass-card p-12 text-center">
-              <div className="text-5xl mb-4">📚</div>
+              <div className="w-12 h-12 mx-auto mb-4 text-primary-500"><BookOpen className="w-12 h-12 mx-auto" /></div>
               <p className="text-sub">No modules yet</p>
             </div>
           ) : course.modules?.map((mod, i) => (
@@ -274,9 +275,7 @@ export default function CoursePage() {
                 {mod.materials?.map(mat => (
                   <a key={mat.id} href={mat.url} target="_blank" rel="noopener noreferrer"
                     className="flex items-center space-x-3 px-5 py-3 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors">
-                    <span className="text-lg">
-                      {mat.type === 'PDF' ? '📄' : mat.type === 'VIDEO' ? '🎬' : '📝'}
-                    </span>
+                    <FileText className="w-4 h-4 text-primary-500 flex-shrink-0" />
                     <div className="flex-1">
                       <p className="text-sm text-heading">{mat.title}</p>
                       <p className="text-xs text-muted">{mat.type}</p>
@@ -298,7 +297,7 @@ export default function CoursePage() {
         <div className="space-y-6">
           {/* Quizzes */}
           <div>
-            <h3 className="text-lg font-semibold text-heading mb-3">📝 Quizzes</h3>
+            <h3 className="text-lg font-semibold text-heading mb-3">Quizzes</h3>
             {quizzes.length === 0 ? (
               <div className="glass-card p-6 text-center">
                 <p className="text-sub text-sm">No quizzes</p>
@@ -311,14 +310,14 @@ export default function CoursePage() {
                   <span>•</span>
                   <span>{quiz.durationMinutes} min</span>
                   {quiz.externalUrl && (
-                    <span className="bg-blue-100 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 px-2 py-0.5 rounded font-medium">🔗 External</span>
+                    <span className="bg-blue-100 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 px-2 py-0.5 rounded font-medium">External</span>
                   )}
                 </div>
                 {isStudent && enrolled && (
                   quiz.externalUrl ? (
                     <a href={quiz.externalUrl} target="_blank" rel="noopener noreferrer"
                       className="btn-primary w-full text-sm !py-1.5 block text-center">
-                      🔗 Open Quiz
+                      Open Quiz
                     </a>
                   ) : (
                     <Link to={`/quiz/${quiz.id}`} className="btn-primary w-full text-sm !py-1.5 block text-center">
@@ -333,7 +332,7 @@ export default function CoursePage() {
           {/* Assignments */}
           <div>
             <div className="flex items-center justify-between mb-3">
-              <h3 className="text-lg font-semibold text-heading">📋 Assignments</h3>
+              <h3 className="text-lg font-semibold text-heading">Assignments</h3>
               {isOwner && (
                 <button onClick={() => { setAssignmentForm({ title: '', description: '', totalMarks: 100, deadline: '', filePath: '' }); setAssignmentFile(null); setShowCreateAssignment(true) }}
                   className="text-xs bg-primary-500 text-white px-3 py-1 rounded-lg hover:bg-primary-600 transition-colors">+ New</button>
@@ -364,7 +363,7 @@ export default function CoursePage() {
                 {asn.filePath && (
                   <a href={asn.filePath} target="_blank" rel="noopener noreferrer"
                     className="flex items-center space-x-2 text-xs bg-blue-50 dark:bg-blue-950/20 text-blue-600 dark:text-blue-400 px-3 py-2 rounded-lg mb-2 hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors">
-                    <span>📄</span>
+                    <FileText className="w-3.5 h-3.5 flex-shrink-0" />
                     <span className="font-medium">Download Assignment File</span>
                     <svg className="w-3 h-3 ml-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
@@ -377,7 +376,7 @@ export default function CoursePage() {
                   <div className="mt-3">
                     {submittingId === asn.id ? (
                       <div className="space-y-2 bg-gray-50 dark:bg-white/5 rounded-lg p-3">
-                        <p className="text-xs font-medium text-heading">📤 Upload your submission (max 5 MB)</p>
+                        <p className="text-xs font-medium text-heading">Upload your submission (max 5 MB)</p>
                         <input
                           type="file"
                           onChange={(e) => setSubmissionFile(e.target.files[0])}
@@ -404,7 +403,7 @@ export default function CoursePage() {
                     ) : (
                       <button onClick={() => setSubmittingId(asn.id)}
                         className="w-full bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-medium py-2 px-4 rounded-lg transition-colors">
-                        📤 Submit Assignment
+                        Submit Assignment
                       </button>
                     )}
                   </div>
@@ -412,7 +411,7 @@ export default function CoursePage() {
 
                 {isStudent && asn.submitted && (
                   <div className="mt-2 bg-emerald-50 dark:bg-emerald-950/20 text-emerald-600 dark:text-emerald-400 text-xs font-medium px-3 py-2 rounded-lg text-center">
-                    ✅ Submitted
+                    Submitted
                   </div>
                 )}
 
@@ -497,7 +496,7 @@ export default function CoursePage() {
                   <label className="label-text">Upload File</label>
                   <input type="file" onChange={handleFileUpload} className="input-field text-sm" accept=".pdf,.doc,.docx,.ppt,.pptx" />
                   {uploading && <p className="text-xs text-primary-500 dark:text-primary-400 mt-1">Uploading...</p>}
-                  {materialForm.url && !uploading && <p className="text-xs text-emerald-500 dark:text-emerald-400 mt-1">✓ File uploaded</p>}
+                  {materialForm.url && !uploading && <p className="text-xs text-emerald-500 dark:text-emerald-400 mt-1">File uploaded</p>}
                 </div>
               )}
               <div className="flex space-x-3">
@@ -564,7 +563,7 @@ export default function CoursePage() {
               <div>
                 <label className="label-text">Replace File (max 5 MB, optional)</label>
                 {assignmentForm.filePath && (
-                  <p className="text-xs text-emerald-500 mb-1">✓ Current file attached</p>
+                  <p className="text-xs text-emerald-500 mb-1">Current file attached</p>
                 )}
                 <input type="file" onChange={(e) => setAssignmentFile(e.target.files[0])}
                   className="w-full text-sm file:mr-3 file:py-1.5 file:px-4 file:rounded-lg file:border-0 file:text-sm file:bg-primary-500 file:text-white hover:file:bg-primary-400 cursor-pointer input-field"

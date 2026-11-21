@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { structureAPI } from '../../services/api'
+import { Trash2 } from 'lucide-react'
 
 export default function AdminDepartmentTab({ showMsg }) {
   const [departments, setDepartments] = useState([])
@@ -114,7 +115,7 @@ export default function AdminDepartmentTab({ showMsg }) {
 
   return (
     <div className="animate-fade-in space-y-8">
-      <h2 className="section-title">🏛️ Academic Structure Management</h2>
+      <h2 className="section-title">Academic Structure Management</h2>
 
       <div className="grid md:grid-cols-3 gap-6">
         {/* 1. DEPARTMENTS */}
@@ -130,7 +131,7 @@ export default function AdminDepartmentTab({ showMsg }) {
              {departments.map(d => (
                 <div key={d.id} className={`flex items-center justify-between p-3 rounded-lg border cursor-pointer transition-colors ${selectedDept === String(d.id) ? 'bg-primary-50 dark:bg-primary-500/20 border-primary-500' : 'bg-gray-50 dark:bg-white/5 border-transparent hover:border-gray-200'}`} onClick={() => setSelectedDept(String(d.id))}>
                    <span className="font-semibold text-heading text-sm">{d.name}</span>
-                   <button className="text-red-400 hover:text-red-600 p-1" onClick={(e) => { e.stopPropagation(); handleDeleteDept(d.id); }}>🗑️</button>
+                   <button className="text-red-400 hover:text-red-600 p-1" onClick={(e) => { e.stopPropagation(); handleDeleteDept(d.id); }}><Trash2 className="w-4 h-4" /></button>
                 </div>
              ))}
              {departments.length === 0 && <p className="text-muted text-sm text-center py-4">No departments found.</p>}
@@ -159,7 +160,7 @@ export default function AdminDepartmentTab({ showMsg }) {
                       <span className="font-semibold text-heading text-sm">Year {c.collegeYear} - Sem {c.semester}</span>
                       <span className="text-xs text-sub">Batch: {c.batchYear}</span>
                    </div>
-                   <button className="text-red-400 hover:text-red-600 p-1" onClick={(e) => { e.stopPropagation(); handleDeleteClass(c.id); }}>🗑️</button>
+                   <button className="text-red-400 hover:text-red-600 p-1" onClick={(e) => { e.stopPropagation(); handleDeleteClass(c.id); }}><Trash2 className="w-4 h-4" /></button>
                 </div>
              ))}
              {selectedDept && classes.length === 0 && <p className="text-muted text-sm text-center py-4">No classes in this department.</p>}
@@ -179,7 +180,7 @@ export default function AdminDepartmentTab({ showMsg }) {
              {!selectedClass ? <p className="text-muted text-sm text-center py-4">Select a class.</p> : sections.map(s => (
                 <div key={s.id} className="flex items-center justify-between p-3 rounded-lg border border-transparent bg-gray-50 dark:bg-white/5">
                    <span className="font-semibold text-heading text-sm">Section {s.name}</span>
-                   <button className="text-red-400 hover:text-red-600 p-1" onClick={() => handleDeleteSection(s.id)}>🗑️</button>
+                   <button className="text-red-400 hover:text-red-600 p-1" onClick={() => handleDeleteSection(s.id)}><Trash2 className="w-4 h-4" /></button>
                 </div>
              ))}
              {selectedClass && sections.length === 0 && <p className="text-muted text-sm text-center py-4">No sections in this class.</p>}

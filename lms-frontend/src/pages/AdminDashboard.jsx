@@ -5,7 +5,7 @@ import { adminAPI, courseAPI, timetableAPI, syllabusAPI, internalMarkAPI, achiev
 import ChangePassword from '../components/ChangePassword'
 import AdminTimetableTab from '../components/admin/AdminTimetableTab'
 import AdminDepartmentTab from '../components/admin/AdminDepartmentTab'
-import { GraduationCap, Users, Building2, BookOpen, BarChart2, Target } from 'lucide-react'
+import { GraduationCap, Users, Building2, BookOpen, BarChart2, Target, CheckCircle } from 'lucide-react'
 
 // ─────────────────── HARD-CODED DATA ───────────────────
 const YEARS = [1, 2, 3, 4]
@@ -195,8 +195,8 @@ export default function AdminDashboard() {
       </div>
 
       {message && (
-        <div className="mb-4 p-3 rounded-xl bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 text-sm font-medium animate-fade-in">
-          ✅ {message}
+        <div className="mb-4 p-3 rounded-xl bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 text-sm font-medium animate-fade-in flex items-center gap-1.5">
+          <CheckCircle className="w-4 h-4" /> {message}
         </div>
       )}
 
@@ -264,7 +264,7 @@ export default function AdminDashboard() {
           {activeTab === 'faculty' && (
             <div>
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-                <h2 className="section-title mb-0">👨‍🏫 Faculty Management ({faculty.length})</h2>
+                <h2 className="section-title mb-0">Faculty Management ({faculty.length})</h2>
                 <div className="flex gap-2 flex-wrap">
                   <input type="text" className="input-field w-auto" placeholder="Search by name/email..." value={searchFaculty} onChange={e => setSearchFaculty(e.target.value)} />
                   <select className="input-field w-auto" value={deptFilter} onChange={e => setDeptFilter(e.target.value)}>
@@ -272,19 +272,19 @@ export default function AdminDashboard() {
                     {departments.map(d => <option key={d.id} value={d.name}>{d.name}</option>)}
                   </select>
                   <button onClick={() => { showForm ? resetUserForm() : (setShowForm(true), setUserForm({...userForm, role: 'INSTRUCTOR'})) }} className="btn-primary text-sm whitespace-nowrap">
-                    {showForm ? '✕ Cancel' : '➕ Add Faculty'}
+                    {showForm ? 'Cancel' : '+ Add Faculty'}
                   </button>
                 </div>
               </div>
 
               {showForm && (
                 <form onSubmit={handleSubmitUser} className="glass-card p-6 mb-6 animate-slide-up">
-                  <h3 className="text-lg font-semibold text-heading mb-4">{editingId ? '✏️ Edit Faculty' : '➕ Register New Faculty'}</h3>
+                  <h3 className="text-lg font-semibold text-heading mb-4">{editingId ? 'Edit Faculty' : 'Register New Faculty'}</h3>
                   <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
                     <div><label className="label-text">Full Name</label>
                       <input className="input-field" value={userForm.name} onChange={e => setUserForm({...userForm, name: e.target.value})} required placeholder="Dr. John Smith" /></div>
                     <div><label className="label-text">Email</label>
-                      <input type="email" className="input-field" value={userForm.email} onChange={e => setUserForm({...userForm, email: e.target.value})} required placeholder="john@rit.edu" /></div>
+                      <input type="email" className="input-field" value={userForm.email} onChange={e => setUserForm({...userForm, email: e.target.value})} required placeholder="john@lms.edu" /></div>
                     <div><label className="label-text">Password {editingId && '(Leave blank to keep)'}</label>
                       <input type="password" className="input-field" value={userForm.password} onChange={e => setUserForm({...userForm, password: e.target.value})} minLength={6} required={!editingId} placeholder="••••••••" /></div>
                     <div><label className="label-text">Phone</label>
@@ -301,7 +301,7 @@ export default function AdminDashboard() {
 
               {/* Subject Allocation */}
               <div className="glass-card p-6 mb-6">
-                <h3 className="font-semibold text-heading mb-4">📋 Assign Faculty to Course</h3>
+                <h3 className="font-semibold text-heading mb-4">Assign Faculty to Course</h3>
                 <form onSubmit={handleAllocate} className="flex flex-col sm:flex-row gap-3">
                   <select value={allocForm.courseId} onChange={e => setAllocForm({...allocForm, courseId: e.target.value})} className="input-field flex-1" required>
                     <option value="">Select Course</option>
@@ -358,20 +358,20 @@ export default function AdminDashboard() {
           {activeTab === 'students' && (
             <div>
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-                <h2 className="section-title mb-0">👩‍🎓 Student Management ({users.length})</h2>
+                <h2 className="section-title mb-0">Student Management ({users.length})</h2>
                 <button onClick={() => { showForm ? resetUserForm() : (setShowForm(true), setUserForm({...userForm, role: 'STUDENT'})) }} className="btn-primary text-sm">
-                  {showForm ? '✕ Cancel' : '➕ Add Student'}
+                  {showForm ? 'Cancel' : '+ Add Student'}
                 </button>
               </div>
 
               {showForm && (
                 <form onSubmit={handleSubmitUser} className="glass-card p-6 mb-6 animate-slide-up">
-                  <h3 className="text-lg font-semibold text-heading mb-4">{editingId ? '✏️ Edit Student' : '➕ Register New Student'}</h3>
+                  <h3 className="text-lg font-semibold text-heading mb-4">{editingId ? 'Edit Student' : 'Register New Student'}</h3>
                   <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
                     <div><label className="label-text">Full Name</label>
                       <input className="input-field" value={userForm.name} onChange={e => setUserForm({...userForm, name: e.target.value})} required placeholder="Student Name" /></div>
                     <div><label className="label-text">Email</label>
-                      <input type="email" className="input-field" value={userForm.email} onChange={e => setUserForm({...userForm, email: e.target.value})} required placeholder="student@rit.edu" /></div>
+                      <input type="email" className="input-field" value={userForm.email} onChange={e => setUserForm({...userForm, email: e.target.value})} required placeholder="student@lms.edu" /></div>
                     <div><label className="label-text">Password {editingId && '(Leave blank to keep)'}</label>
                       <input type="password" className="input-field" value={userForm.password} onChange={e => setUserForm({...userForm, password: e.target.value})} minLength={6} required={!editingId} placeholder="••••••••" /></div>
                     <div><label className="label-text">Register Number</label>
@@ -535,15 +535,15 @@ function TrackingTab({ courses, faculty, students }) {
 
   return (
     <div>
-      <h2 className="section-title">📈 Tracking System</h2>
+      <h2 className="section-title">Tracking System</h2>
 
       {/* View Toggle */}
       <div className="flex gap-2 mb-6">
         <button onClick={() => setTrackingView('faculty')} className={`px-5 py-2.5 rounded-xl font-semibold text-sm transition-all ${trackingView === 'faculty' ? 'btn-primary' : 'btn-secondary'}`}>
-          👨‍🏫 Faculty Tracking
+          Faculty Tracking
         </button>
         <button onClick={() => setTrackingView('student')} className={`px-5 py-2.5 rounded-xl font-semibold text-sm transition-all ${trackingView === 'student' ? 'btn-primary' : 'btn-secondary'}`}>
-          👩‍🎓 Student Tracking
+          Student Tracking
         </button>
       </div>
 
@@ -565,7 +565,7 @@ function TrackingTab({ courses, faculty, students }) {
           {/* Syllabus Completion */}
           <div className="glass-card p-6">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="font-bold text-heading">📋 Syllabus Completion</h3>
+              <h3 className="font-bold text-heading">Syllabus Completion</h3>
               <span className={`text-sm font-bold ${syllabusProgress >= 80 ? 'text-emerald-500' : syllabusProgress >= 50 ? 'text-amber-500' : 'text-red-500'}`}>
                 {syllabusProgress}%
               </span>
@@ -579,7 +579,7 @@ function TrackingTab({ courses, faculty, students }) {
                 <div key={s.id} className={`flex items-center justify-between p-3 rounded-xl ${s.completed ? 'bg-emerald-500/10 border border-emerald-500/20' : 'bg-gray-50 dark:bg-white/5'}`}>
                   <div className="flex items-center gap-3">
                     <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${s.completed ? 'bg-emerald-500 text-white' : 'bg-gray-200 dark:bg-white/10 text-sub'}`}>
-                      {s.completed ? '✓' : i + 1}
+                      {s.completed ? 'Done' : i + 1}
                     </span>
                     <span className={`text-sm ${s.completed ? 'text-emerald-600 dark:text-emerald-400 line-through' : 'text-heading font-medium'}`}>{s.topic}</span>
                   </div>
@@ -592,7 +592,7 @@ function TrackingTab({ courses, faculty, students }) {
 
           {/* Faculty Summary */}
           <div className="glass-card p-6">
-            <h3 className="font-bold text-heading mb-4">👨‍🏫 Faculty Summary</h3>
+            <h3 className="font-bold text-heading mb-4">Faculty Summary</h3>
             <div className="grid sm:grid-cols-3 gap-4">
               <div className="bg-blue-500/10 rounded-xl p-4 text-center">
                 <div className="text-2xl font-black text-blue-600 dark:text-blue-400">{syllabusData.length}</div>
@@ -616,7 +616,7 @@ function TrackingTab({ courses, faculty, students }) {
           {/* Internal Marks */}
           <div className="glass-card overflow-hidden">
             <div className="p-4 border-b border-gray-100 dark:border-white/10">
-              <h3 className="font-bold text-heading">✒️ Internal Marks</h3>
+              <h3 className="font-bold text-heading">Internal Marks</h3>
             </div>
             <div className="overflow-x-auto">
               <table className="w-full text-left min-w-[700px]">
@@ -653,7 +653,7 @@ function TrackingTab({ courses, faculty, students }) {
 
           {/* Student Stats */}
           <div className="glass-card p-6">
-            <h3 className="font-bold text-heading mb-4">📊 Student Performance Summary</h3>
+            <h3 className="font-bold text-heading mb-4">Student Performance Summary</h3>
             <div className="grid sm:grid-cols-3 gap-4">
               <div className="bg-blue-500/10 rounded-xl p-4 text-center">
                 <div className="text-2xl font-black text-blue-600 dark:text-blue-400">{marksData.length}</div>
@@ -678,7 +678,7 @@ function TrackingTab({ courses, faculty, students }) {
 
       {!selectedCourseId && !loadingData && (
         <div className="glass-card p-12 text-center">
-          <div className="text-5xl mb-4">📊</div>
+          <div className="w-12 h-12 mx-auto mb-4 text-primary-500"><BarChart2 className="w-12 h-12 mx-auto" /></div>
           <p className="text-sub font-medium">Select a course above to view tracking data</p>
           <p className="text-muted text-sm mt-1">Track faculty syllabus progress and student performance</p>
         </div>

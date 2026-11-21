@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { authAPI } from '../services/api'
 import Carousel from '../components/Carousel'
+import { GraduationCap } from 'lucide-react'
 
 export default function LoginPage() {
   const [form, setForm] = useState({ email: '', password: '' })
@@ -47,11 +48,11 @@ export default function LoginPage() {
           <div className="relative z-10 w-full max-w-sm mx-auto">
             {/* Logo & Header */}
             <div className="mb-10 text-center lg:text-left">
-              <div className="w-16 h-16 rounded-2xl flex items-center justify-center mb-6 mx-auto lg:ml-0 overflow-hidden shadow-xl shadow-blue-500/20">
-                <img src="/logo.png" alt="RIT Logo" className="w-full h-full object-cover rounded-2xl" />
+              <div className="w-16 h-16 rounded-2xl flex items-center justify-center mb-6 mx-auto lg:ml-0 overflow-hidden shadow-xl shadow-blue-500/20 bg-gradient-to-tr from-blue-600 to-indigo-600 text-white">
+                <GraduationCap className="w-9 h-9" />
               </div>
               <h1 className="text-3xl font-black text-heading leading-tight mb-2">
-                RIT-LMS <span className="text-primary-500 tracking-tighter"></span>
+                Learning Management System <span className="text-primary-500 tracking-tighter"></span>
               </h1>
               <p className="text-sub font-medium">
                 Academic Portal Login
@@ -77,7 +78,7 @@ export default function LoginPage() {
                     value={form.email} 
                     onChange={handleChange}
                     className="input-field pl-12 group-focus-within:border-primary-500 transition-colors" 
-                    placeholder="name@rit.edu" 
+                    placeholder="name@lms.edu" 
                     required 
                   />
                   <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-primary-500 transition-colors">

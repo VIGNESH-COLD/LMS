@@ -47,7 +47,7 @@ public class AchievementController {
         Achievement a = achievementService.create(
             req.get("title").toString(),
             req.getOrDefault("description", "").toString(),
-            req.getOrDefault("icon", "🏆").toString(),
+            req.getOrDefault("icon", "").toString(),
             req.getOrDefault("badge", "GOLD").toString(),
             studentId, courseId
         );

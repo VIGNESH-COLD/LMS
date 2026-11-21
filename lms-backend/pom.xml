@@ -14,7 +14,7 @@
     <groupId>com.lms</groupId>
     <artifactId>lms-backend</artifactId>
     <version>1.0.0</version>
-    <name>LMS Backend</name>
+    <name>Learning Management System Backend</name>
     <description>LMS Integration for Course Content and Assessments</description>
 
     <properties>

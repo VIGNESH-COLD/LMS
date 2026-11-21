@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { quizAPI, submissionAPI } from '../services/api'
+import { Trophy, Award, BookOpen, Clock } from 'lucide-react'
 
 export default function QuizPage() {
   const { id } = useParams()
@@ -99,7 +100,9 @@ export default function QuizPage() {
     return (
       <div className="page-container max-w-2xl mx-auto">
         <div className="glass-card p-10 text-center animate-slide-up">
-          <div className="text-6xl mb-6">{percentage >= 70 ? '🎉' : percentage >= 50 ? '👍' : '📚'}</div>
+          <div className="mb-6 flex justify-center">
+            {percentage >= 70 ? <Trophy className="w-16 h-16 text-amber-500" /> : percentage >= 50 ? <Award className="w-16 h-16 text-blue-500" /> : <BookOpen className="w-16 h-16 text-primary-500" />}
+          </div>
           <h1 className="text-3xl font-bold text-heading mb-2">Quiz Completed!</h1>
           <p className="text-sub mb-8">{quiz.title}</p>
 
@@ -137,7 +140,9 @@ export default function QuizPage() {
       {showTimesUp && (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center z-[100] p-4">
           <div className="glass-card p-10 max-w-md w-full text-center animate-slide-up">
-            <div className="text-7xl mb-4 animate-bounce">⏰</div>
+            <div className="w-16 h-16 mx-auto mb-4 text-red-500 flex items-center justify-center animate-bounce">
+              <Clock className="w-16 h-16" />
+            </div>
             <h2 className="text-3xl font-bold text-red-500 dark:text-red-400 mb-3">Time's Up!</h2>
             <p className="text-sub mb-6">Your quiz will be auto-submitted with your current answers.</p>
             <div className="mb-6">

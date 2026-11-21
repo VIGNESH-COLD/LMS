@@ -55,20 +55,20 @@ public class ChatbotService {
         String systemPrompt = buildSystemPrompt(user);
         
         try {
-            return callMistral(systemPrompt, userMessage, conversationHistory);
+            return callOllama(systemPrompt, userMessage, conversationHistory);
         } catch (Exception e) {
-            log.warn("Mistral API failed, falling back to Ollama. Error: {}", e.getMessage());
+            log.warn("Ollama direct call failed, falling back to Mistral. Error: {}", e.getMessage());
             try {
-                return callOllama(systemPrompt, userMessage, conversationHistory);
-            } catch (Exception ollamaEx) {
-                return "⚠️ Both Mistral and Ollama AI services failed.\nMistral Error: " + e.getMessage() + "\nOllama Error: " + ollamaEx.getMessage();
+                return callMistral(systemPrompt, userMessage, conversationHistory);
+            } catch (Exception mistralEx) {
+                return "The AI assistant is temporarily unavailable. Please make sure Ollama is running (`ollama serve`) and try again.";
             }
         }
     }
 
     private String buildSystemPrompt(User user) {
         StringBuilder sb = new StringBuilder();
-        sb.append("You are RIT-LMS Assistant, the official AI chatbot for Rajalakshmi Institute of Technology's Learning Management System.\n");
+        sb.append("You are the AI Assistant for the Learning Management System.\n");
         sb.append("Current date: ").append(LocalDate.now()).append("\n");
         sb.append("Current time: ").append(LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm"))).append("\n");
         sb.append("Current day: ").append(LocalDate.now().getDayOfWeek().name()).append("\n\n");
@@ -507,7 +507,7 @@ public class ChatbotService {
             return "I received an unexpected response. Please try again.";
         } catch (Exception e) {
             log.error("Ollama API error: {}", e.getMessage());
-            return "⚠️ I'm unable to connect to the AI service right now. Please make sure Ollama is running (`ollama serve`) and try again.";
+            throw new RuntimeException("Ollama API error: " + e.getMessage(), e);
         }
     }
 }

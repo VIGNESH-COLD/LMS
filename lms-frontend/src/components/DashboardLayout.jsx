@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext'
 import { useTheme } from '../context/ThemeContext'
 import Chatbot from './Chatbot'
 
-import { LayoutDashboard, User, BookOpen, FileEdit, Trophy, Target, Megaphone, Calendar, Lock, Building2, Users, LineChart, BookMarked, ClipboardList } from 'lucide-react'
+import { LayoutDashboard, User, BookOpen, FileEdit, Trophy, Target, Megaphone, Calendar, Lock, Building2, Users, LineChart, BookMarked, ClipboardList, GraduationCap } from 'lucide-react'
 
 export default function DashboardLayout({ children }) {
   const { user, logout } = useAuth()
@@ -83,14 +83,14 @@ export default function DashboardLayout({ children }) {
       <aside className={`sidebar transition-all duration-300 shadow-2xl z-50 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
         <div className="p-6 h-full flex flex-col">
           <div className="flex items-center space-x-3 mb-8">
-            <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0 shadow-lg ring-2 ring-white/20">
-              <img src="/logo.png" alt="RIT Logo" className="w-full h-full object-cover" />
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center flex-shrink-0 shadow-lg ring-2 ring-white/20">
+              <GraduationCap className="w-6 h-6 text-white" />
             </div>
             <div>
               <h1 className="font-bold text-sm leading-tight text-white uppercase tracking-wider">
-                Rajalakshmi
+                Learning
               </h1>
-              <p className="text-[10px] text-gray-400">INSTITUTE OF TECHNOLOGY</p>
+              <p className="text-[10px] text-gray-400">MANAGEMENT SYSTEM</p>
             </div>
           </div>
 
@@ -208,12 +208,12 @@ export default function DashboardLayout({ children }) {
         
         {/* Footer */}
         <footer className="px-3 sm:px-8 py-3 sm:py-4 bg-white/50 dark:bg-black/20 backdrop-blur-sm border-t border-gray-100 dark:border-white/10 flex flex-col sm:flex-row justify-between items-center gap-2 text-[10px] text-gray-500">
-          <span className="tracking-wide text-gray-400">&copy; 2026 RAJALAKSHMI INSTITUTE OF TECHNOLOGY.</span>
+          <span className="tracking-wide text-gray-400">&copy; 2026 LEARNING MANAGEMENT SYSTEM.</span>
           <div className="flex items-center space-x-2">
-             <div className="w-4 h-4 rounded-sm overflow-hidden flex-shrink-0">
-               <img src="/logo.png" alt="RIT" className="w-full h-full object-cover" />
+             <div className="w-5 h-5 rounded-md bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center flex-shrink-0">
+               <GraduationCap className="w-3.5 h-3.5 text-white" />
              </div>
-             <span className="font-bold tracking-tighter text-blue-600 dark:text-blue-400">RIT-IMS VER 2.0</span>
+             <span className="font-bold tracking-tighter text-blue-600 dark:text-blue-400">LMS PORTAL</span>
           </div>
         </footer>
       </main>

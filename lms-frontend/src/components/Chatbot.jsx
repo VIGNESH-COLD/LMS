@@ -3,11 +3,12 @@ import { chatAPI } from '../services/api'
 import { useAuth } from '../context/AuthContext'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
+import { Bot } from 'lucide-react'
 
 export default function Chatbot() {
   const [isOpen, setIsOpen] = useState(false)
   const [messages, setMessages] = useState([
-    { role: 'assistant', content: "Hello! I'm your RIT-LMS AI Assistant. How can I help you today?" }
+    { role: 'assistant', content: "Hello! I'm your Learning Management System AI Assistant. How can I help you today?" }
   ])
   const [input, setInput] = useState('')
   const [isLoading, setIsLoading] = useState(false)
@@ -20,7 +21,7 @@ export default function Chatbot() {
 
   // Clear chat if user changes
   useEffect(() => {
-    setMessages([{ role: 'assistant', content: "Hello! I'm your RIT-LMS AI Assistant. How can I help you today?" }])
+    setMessages([{ role: 'assistant', content: "Hello! I'm your Learning Management System AI Assistant. How can I help you today?" }])
     setIsOpen(false)
   }, [user?.id])
 
@@ -96,10 +97,10 @@ export default function Chatbot() {
         <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-4 flex items-center justify-between shadow-md relative z-10">
           <div className="flex items-center space-x-3">
             <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center p-1.5 backdrop-blur-sm">
-              <img src="/logo.png" alt="RIT AI" className="w-full h-full object-contain rounded-full" />
+              <Bot className="w-6 h-6 text-white" />
             </div>
             <div>
-              <h3 className="text-white font-bold text-sm">RIT Smart Assistant</h3>
+              <h3 className="text-white font-bold text-sm">AI Smart Assistant</h3>
               <p className="text-blue-100 text-[10px] uppercase tracking-wider">{user.role} MODE</p>
             </div>
           </div>

@@ -2,20 +2,20 @@ import { useState, useEffect } from 'react'
 
 const slides = [
   {
-    title: "Rajalakshmi Institute of Technology",
-    description: "Welcome to RIT - Nurturing the innovators and leaders of tomorrow with state-of-the-art infrastructure.",
+    title: "Learning Management System",
+    description: "Nurturing the innovators and leaders of tomorrow with state-of-the-art educational infrastructure.",
     image: "/carousel/campus-building-1.png",
     color: "from-blue-600 to-indigo-700"
   },
   {
-    title: "World-Class Campus",
-    description: "Experience learning in a lush green, eco-friendly campus designed for academic excellence.",
+    title: "World-Class Learning",
+    description: "Experience learning in an environment designed for academic excellence.",
     image: "/carousel/campus-aerial.png",
     color: "from-indigo-600 to-purple-700"
   },
   {
     title: "Advanced Facilities",
-    description: "Equipped with modern laboratories, comprehensive libraries, and advanced research centers.",
+    description: "Equipped with modern laboratories, comprehensive libraries, and advanced research tools.",
     image: "/carousel/campus-building-2.png",
     color: "from-purple-600 to-pink-700"
   },
@@ -26,9 +26,9 @@ const slides = [
     color: "from-blue-500 to-teal-600"
   },
   {
-    title: "Excellence in Engineering",
-    description: "Join the legacy of excellence and shape your future with our cutting-edge programs.",
-    image: "/carousel/rit-logo.png",
+    title: "Excellence in Education",
+    description: "Shape your future with our cutting-edge academic programs and courses.",
+    image: "/carousel/campus-building-1.png",
     color: "from-blue-600 to-indigo-600"
   }
 ]

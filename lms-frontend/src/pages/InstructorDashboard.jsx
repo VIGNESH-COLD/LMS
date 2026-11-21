@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { courseAPI, quizAPI, assignmentAPI, analyticsAPI, internalMarkAPI, syllabusAPI, timetableAPI, courseMaterialAPI } from '../services/api'
-import { GraduationCap } from 'lucide-react'
+import { GraduationCap, BookOpen, Folder } from 'lucide-react'
 import ChangePassword from '../components/ChangePassword'
 import SharedTimetableTab from '../components/SharedTimetableTab'
 
@@ -193,8 +193,7 @@ export default function FacultyDashboard() {
   }
 
   const getFileIcon = (type) => {
-    const icons = { pdf: '📄', doc: '📝', docx: '📝', ppt: '📊', pptx: '📊', xls: '📈', xlsx: '📈', png: '🖼️', jpg: '🖼️', jpeg: '🖼️', zip: '📦', mp4: '🎬', mp3: '🎵' }
-    return icons[type] || '📎'
+    return (type || 'FILE').toUpperCase().slice(0, 4)
   }
 
   const handleToggleSyllabus = async (id) => {
@@ -238,15 +237,15 @@ export default function FacultyDashboard() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
               {courses.length === 0 ? (
                 <div className="col-span-full text-center py-16 glass-card">
-                  <div className="text-5xl mb-4">📖</div>
+                  <div className="w-12 h-12 mx-auto mb-4 text-primary-500"><BookOpen className="w-12 h-12 mx-auto" /></div>
                   <p className="text-sub">No courses created yet</p>
                   <button onClick={() => setShowCreateCourse(true)} className="btn-primary mt-4 text-sm">Create Your First Course</button>
                 </div>
               ) : courses.map(course => (
                 <div key={course.id} className="glass-card-hover p-6 group">
                   <div className="flex items-start justify-between mb-3">
-                    <Link to={`/course/${course.id}`} className="w-12 h-12 bg-gradient-to-br from-primary-500 to-accent-500 rounded-xl flex items-center justify-center text-xl hover:scale-105 transition-transform">
-                      📖
+                    <Link to={`/course/${course.id}`} className="w-12 h-12 bg-gradient-to-br from-primary-500 to-accent-500 rounded-xl flex items-center justify-center hover:scale-105 transition-transform">
+                      <BookOpen className="w-6 h-6 text-white" />
                     </Link>
                     <div className="flex space-x-1">
                       <span className="badge-primary">{course.moduleCount} modules</span>
@@ -378,7 +377,7 @@ export default function FacultyDashboard() {
               {/* Upload Form */}
               <div className="md:col-span-1">
                 <form onSubmit={handleUploadMaterial} className="glass-card p-6 sticky top-24">
-                  <h3 className="font-semibold text-heading mb-4">📤 Upload File</h3>
+                  <h3 className="font-semibold text-heading mb-4">Upload File</h3>
                   <div className="space-y-3">
                     <div><label className="label-text">Title</label>
                       <input className="input-field" required value={materialForm.title} onChange={e => setMaterialForm({...materialForm, title: e.target.value})} placeholder="e.g. Chapter 1 Notes" /></div>
@@ -398,7 +397,7 @@ export default function FacultyDashboard() {
                           <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
                           <span>Uploading...</span>
                         </span>
-                      ) : '📤 Upload Material'}
+                      ) : 'Upload Material'}
                     </button>
                   </div>
                 </form>
@@ -408,7 +407,7 @@ export default function FacultyDashboard() {
               <div className="md:col-span-2 space-y-3">
                 {materials.length === 0 ? (
                   <div className="glass-card p-8 text-center">
-                    <div className="text-5xl mb-4">📁</div>
+                    <div className="w-12 h-12 mx-auto mb-4 text-primary-500"><Folder className="w-12 h-12 mx-auto" /></div>
                     <p className="text-sub">No materials uploaded for this course yet.</p>
                     <p className="text-muted text-sm mt-1">Upload PDFs, documents, presentations, or any study material.</p>
                   </div>
@@ -492,7 +491,7 @@ export default function FacultyDashboard() {
                       </div>
                     </div>
                     <div>
-                       <button onClick={() => { syllabusAPI.delete(item.id); loadCourseSpecificData(selectedCourseId) }} className="w-8 h-8 rounded bg-red-50 text-red-400 hover:bg-red-500 hover:text-white flex items-center justify-center transition-colors">✕</button>
+                       <button onClick={() => { syllabusAPI.delete(item.id); loadCourseSpecificData(selectedCourseId) }} className="w-8 h-8 rounded bg-red-50 text-red-400 hover:bg-red-500 hover:text-white flex items-center justify-center transition-colors">&times;</button>
                     </div>
                   </div>
                 ))}
@@ -548,11 +547,11 @@ export default function FacultyDashboard() {
             <div className="flex rounded-lg bg-gray-100 dark:bg-white/10 p-1 mb-6">
               <button type="button" onClick={() => setQuizMode('manual')}
                 className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-all ${quizMode === 'manual' ? 'bg-white dark:bg-white/20 text-heading shadow-sm' : 'text-sub hover:text-heading'}`}>
-                ✍️ Manual Questions
+                Manual Questions
               </button>
               <button type="button" onClick={() => setQuizMode('external')}
                 className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-all ${quizMode === 'external' ? 'bg-white dark:bg-white/20 text-heading shadow-sm' : 'text-sub hover:text-heading'}`}>
-                🔗 External Link
+                External Link
               </button>
             </div>
 
@@ -579,7 +578,7 @@ export default function FacultyDashboard() {
               {quizMode === 'external' && (
                 <div className="border-t border-gray-200 dark:border-white/10 pt-4 mt-4">
                   <div className="bg-blue-50 dark:bg-blue-950/20 rounded-xl p-4 mb-4">
-                    <p className="text-sm text-blue-700 dark:text-blue-400">🔗 Paste a link to an external quiz (Google Forms, Microsoft Forms, or any website). Students will click this link to take the quiz.</p>
+                    <p className="text-sm text-blue-700 dark:text-blue-400">Paste a link to an external quiz (Google Forms, Microsoft Forms, or any website). Students will click this link to take the quiz.</p>
                   </div>
                   <div><label className="label-text">Quiz URL</label>
                     <input className="input-field" value={quizForm.externalUrl} onChange={e => setQuizForm({...quizForm, externalUrl: e.target.value})} placeholder="https://forms.google.com/..." required /></div>
@@ -628,7 +627,7 @@ export default function FacultyDashboard() {
 
               <div className="flex space-x-3 pt-4">
                 <button type="submit" className="btn-accent flex-1" disabled={quizMode === 'manual' && quizForm.questions.length === 0}>
-                  {quizMode === 'external' ? '🔗 Create External Quiz' : 'Create Quiz'}
+                  {quizMode === 'external' ? 'Create External Quiz' : 'Create Quiz'}
                 </button>
                 <button type="button" onClick={() => setShowCreateQuiz(false)} className="btn-secondary flex-1">Cancel</button>
               </div>

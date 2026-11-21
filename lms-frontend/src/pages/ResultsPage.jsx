@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useAuth } from '../context/AuthContext'
 import { submissionAPI, analyticsAPI } from '../services/api'
+import { ClipboardList, FileEdit } from 'lucide-react'
 
 export default function ResultsPage() {
   const { user, isInstructor, isStudent } = useAuth()
@@ -42,7 +43,7 @@ export default function ResultsPage() {
   return (
     <div className="page-container">
       <div className="mb-8 animate-fade-in">
-        <h1 className="text-3xl font-bold text-heading">Results & Analytics 📊</h1>
+        <h1 className="text-3xl font-bold text-heading">Results & Analytics</h1>
         <p className="text-sub mt-1">Track your performance across all assessments</p>
       </div>
 
@@ -164,13 +165,13 @@ export default function ResultsPage() {
           <div className="space-y-3">
             {filteredSubs.length === 0 ? (
               <div className="glass-card p-12 text-center">
-                <div className="text-5xl mb-4">📋</div>
+                <div className="w-12 h-12 mx-auto mb-4 text-primary-500"><ClipboardList className="w-12 h-12 mx-auto" /></div>
                 <p className="text-sub">No submissions yet</p>
               </div>
             ) : filteredSubs.map(sub => (
               <div key={sub.id} className="glass-card p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors">
                 <div className="flex items-center space-x-4">
-                  <div className="text-2xl">{sub.quizId ? '📝' : '📋'}</div>
+                  <div className="text-primary-500">{sub.quizId ? <FileEdit className="w-6 h-6" /> : <ClipboardList className="w-6 h-6" />}</div>
                   <div>
                     <h4 className="font-medium text-heading">{sub.quizTitle || sub.assignmentTitle}</h4>
                     <div className="flex items-center space-x-3 mt-1">
