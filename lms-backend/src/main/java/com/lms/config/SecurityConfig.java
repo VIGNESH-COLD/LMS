@@ -44,6 +44,7 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/api/course-materials/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/files/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/events/**").permitAll()
+                .requestMatchers(HttpMethod.HEAD, "/api/events/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/announcements/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/semester-calendar/**").permitAll()
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
