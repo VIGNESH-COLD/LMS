@@ -10,7 +10,7 @@ A modern, full-stack Learning Management System built with a Spring Boot Java ba
   - Interactive quizzes with instant scoring.
   - Assignments with document submission and grading.
   - Internal marks tracking.
-- **AI Assistant**: Integrated AI assistant powered by the Groq API (`llama-3.3-70b-versatile`) for fast academic help and tutoring.
+- **AI Assistant**: Integrated AI assistant powered by the Groq API (`openai/gpt-oss-120b`) for fast academic help and tutoring.
 - **Student Engagement**: Track student achievements, progress, and performance badges.
 - **Communication & Timetable**: Institution-wide announcements and shared academic schedules.
 
@@ -19,7 +19,7 @@ A modern, full-stack Learning Management System built with a Spring Boot Java ba
 - **Backend**: Java 17, Spring Boot 3, Spring Data JPA, Spring Security
 - **Frontend**: React.js, Vite, Tailwind CSS, Lucide Icons
 - **Database**: MySQL (port 3306)
-- **AI Engine**: Groq API (`llama-3.3-70b-versatile`)
+- **AI Engine**: Groq API (`openai/gpt-oss-120b`)
 
 ## Getting Started
 

@@ -40,7 +40,7 @@ public class ChatbotService {
     @Value("${app.groq.api-key:}")
     private String groqApiKey;
 
-    @Value("${app.groq.model:llama-3.3-70b-versatile}")
+    @Value("${app.groq.model:openai/gpt-oss-120b}")
     private String groqModel;
 
     public String chat(String email, String userMessage, List<Map<String, String>> conversationHistory) {
@@ -449,11 +449,17 @@ public class ChatbotService {
         requestBody.put("messages", messages);
         requestBody.put("temperature", 0.3);
         requestBody.put("top_p", 0.9);
-        requestBody.put("max_tokens", 1024);
+        requestBody.put("max_tokens", 2048);
+
+        String cleanKey = groqApiKey.trim();
+        if (cleanKey.startsWith("Bearer ")) {
+            cleanKey = cleanKey.substring(7).trim();
+        }
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.setBearerAuth(groqApiKey);
+        headers.set("User-Agent", "LMS-Backend/1.0");
+        headers.setBearerAuth(cleanKey);
 
         HttpEntity<Map<String, Object>> entity = new HttpEntity<>(requestBody, headers);
 
