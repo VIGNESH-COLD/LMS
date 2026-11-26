@@ -71,8 +71,8 @@ stop.bat
 
 ## Project Demo Walkthrough
 
-A 60-second walkthrough video demonstrating authentication, admin controls, instructor course workflows, local Ollama AI queries, and student dashboards:
+A walkthrough demonstrating authentication, admin controls, instructor course workflows, local Ollama AI queries, and student dashboards:
 
-<video src="https://github.com/VIGNESH-COLD/LMS/raw/main/lms_project_walkthrough.mp4" controls width="100%"></video>
+![Project Demo Walkthrough](./lms_project_walkthrough.gif)
 
-[Watch Walkthrough Video (lms_project_walkthrough.mp4)](./lms_project_walkthrough.mp4)
+[Download Full 60s HD Video (MP4)](https://github.com/VIGNESH-COLD/LMS/raw/main/lms_project_walkthrough.mp4)
