@@ -75,4 +75,3 @@ A walkthrough demonstrating authentication, admin controls, instructor course wo
 
 ![Project Demo Walkthrough](./lms_project_walkthrough.gif)
 
-[Download Full 60s HD Video (MP4)](https://github.com/VIGNESH-COLD/LMS/raw/main/lms_project_walkthrough.mp4)
