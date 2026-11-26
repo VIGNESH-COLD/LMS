@@ -1,6 +1,6 @@
 # Learning Management System (LMS)
 
-A modern, full-stack Learning Management System built with a Spring Boot Java backend, React frontend, MySQL database, and local Ollama AI assistance. This platform enables educational institutions to manage courses, assessments, student progress, and academic administration.
+A modern, full-stack Learning Management System built with a Spring Boot Java backend, React frontend, MySQL database, and Groq AI assistance. This platform enables educational institutions to manage courses, assessments, student progress, and academic administration.
 
 ## Features
 
@@ -10,7 +10,7 @@ A modern, full-stack Learning Management System built with a Spring Boot Java ba
   - Interactive quizzes with instant scoring.
   - Assignments with document submission and grading.
   - Internal marks tracking.
-- **Local AI Assistant**: Integrated local AI assistant powered by Ollama (`llama3.2`) for academic help and tutoring without external API dependencies.
+- **AI Assistant**: Integrated AI assistant powered by the Groq API (`llama-3.3-70b-versatile`) for fast academic help and tutoring.
 - **Student Engagement**: Track student achievements, progress, and performance badges.
 - **Communication & Timetable**: Institution-wide announcements and shared academic schedules.
 
@@ -19,7 +19,7 @@ A modern, full-stack Learning Management System built with a Spring Boot Java ba
 - **Backend**: Java 17, Spring Boot 3, Spring Data JPA, Spring Security
 - **Frontend**: React.js, Vite, Tailwind CSS, Lucide Icons
 - **Database**: MySQL (port 3306)
-- **AI Engine**: Ollama (`llama3.2`)
+- **AI Engine**: Groq API (`llama-3.3-70b-versatile`)
 
 ## Getting Started
 
@@ -28,11 +28,11 @@ A modern, full-stack Learning Management System built with a Spring Boot Java ba
 - Java JDK 17+
 - Node.js (v18+) & npm
 - MySQL Server (running on port 3306)
-- Ollama (running locally with `llama3.2` installed: `ollama run llama3.2`)
+- Groq API Key (set `GROQ_API_KEY` environment variable or `app.groq.api-key` in `lms-backend/src/main/resources/application.properties`)
 
 ### Quick Start (All-in-One)
 
-Start backend, frontend, and Ollama with a single command:
+Start backend and frontend with a single command:
 ```powershell
 .\run.ps1
 ```
@@ -71,7 +71,7 @@ stop.bat
 
 ## Project Demo Walkthrough
 
-A walkthrough demonstrating authentication, admin controls, instructor course workflows, local Ollama AI queries, and student dashboards:
+A walkthrough demonstrating authentication, admin controls, instructor course workflows, AI assistant queries, and student dashboards:
 
 ![Project Demo Walkthrough](./lms_project_walkthrough.gif)
 

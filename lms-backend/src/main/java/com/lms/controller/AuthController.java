@@ -1,12 +1,12 @@
 package com.lms.controller;
 
-import com.lms.config.JwtUtil;
-
 import com.lms.dto.*;
+import com.lms.model.User;
 import com.lms.service.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
@@ -17,7 +17,6 @@ import java.util.Map;
 public class AuthController {
 
     private final AuthService authService;
-
 
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest request) {
@@ -30,25 +29,18 @@ public class AuthController {
         return ResponseEntity.ok(Map.of("message", "Password reset successfully"));
     }
 
-    private final JwtUtil jwtUtil;
-
     @GetMapping("/me")
-    public ResponseEntity<AuthResponse> getMe(
-            @RequestHeader("Authorization") String authHeader) {
-        String token = authHeader.substring(7);
-        Long userId = jwtUtil.extractUserId(token);
-        return ResponseEntity.ok(authService.getUserProfile(userId));
+    public ResponseEntity<AuthResponse> getMe(Authentication authentication) {
+        User user = authService.getUserByEmail(authentication.getName());
+        return ResponseEntity.ok(authService.getUserProfile(user.getId()));
     }
 
     @PostMapping("/change-password")
     public ResponseEntity<Map<String, String>> changePassword(
-            @RequestHeader("Authorization") String authHeader,
+            Authentication authentication,
             @Valid @RequestBody ChangePasswordRequest request) {
-        
-        String token = authHeader.substring(7);
-        Long userId = jwtUtil.extractUserId(token);
-        
-        authService.changePassword(userId, request);
+        User user = authService.getUserByEmail(authentication.getName());
+        authService.changePassword(user.getId(), request);
         return ResponseEntity.ok(Map.of("message", "Password changed successfully"));
     }
 }

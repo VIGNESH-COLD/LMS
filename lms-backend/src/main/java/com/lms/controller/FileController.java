@@ -34,15 +34,35 @@ public class FileController {
     public ResponseEntity<byte[]> download(@PathVariable String fileName) {
         try {
             byte[] data = fileService.downloadFile(fileName);
+            String lower = fileName.toLowerCase();
             String contentType = "application/octet-stream";
-            if (fileName.endsWith(".pdf")) contentType = "application/pdf";
-            else if (fileName.endsWith(".png")) contentType = "image/png";
-            else if (fileName.endsWith(".jpg") || fileName.endsWith(".jpeg")) contentType = "image/jpeg";
+            String disposition = "attachment";
 
+            if (lower.endsWith(".pdf")) {
+                contentType = "application/pdf";
+                disposition = "inline";
+            } else if (lower.endsWith(".png")) {
+                contentType = "image/png";
+                disposition = "inline";
+            } else if (lower.endsWith(".jpg") || lower.endsWith(".jpeg")) {
+                contentType = "image/jpeg";
+                disposition = "inline";
+            } else if (lower.endsWith(".gif")) {
+                contentType = "image/gif";
+                disposition = "inline";
+            } else if (lower.endsWith(".webp")) {
+                contentType = "image/webp";
+                disposition = "inline";
+            }
+
+            String safeFileName = fileName.replaceAll("[^a-zA-Z0-9._-]", "_");
             return ResponseEntity.ok()
                     .contentType(MediaType.parseMediaType(contentType))
-                    .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + fileName + "\"")
+                    .header("X-Content-Type-Options", "nosniff")
+                    .header(HttpHeaders.CONTENT_DISPOSITION, disposition + "; filename=\"" + safeFileName + "\"")
                     .body(data);
+        } catch (IllegalArgumentException | SecurityException e) {
+            return ResponseEntity.badRequest().build();
         } catch (IOException e) {
             return ResponseEntity.notFound().build();
         }

@@ -150,7 +150,14 @@ public class CourseController {
         Long studentId = getUserId(authHeader);
         var enrollments = enrollmentService.getEnrollmentsByStudent(studentId);
         List<CourseResponse> courses = enrollments.stream()
-                .map(e -> courseService.getCourseById(e.getCourse().getId()))
+                .map(e -> {
+                    try {
+                        return courseService.getCourseById(e.getCourse().getId());
+                    } catch (RuntimeException ex) {
+                        return null;
+                    }
+                })
+                .filter(java.util.Objects::nonNull)
                 .toList();
         return ResponseEntity.ok(courses);
     }

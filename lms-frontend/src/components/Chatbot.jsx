@@ -59,7 +59,7 @@ export default function Chatbot() {
 
     const userMessage = { role: 'user', content: text }
     
-    // Convert current messages to Ollama history format (excluding initial greeting if needed, or keeping it)
+    // Convert current messages to chat history format (excluding initial greeting if needed, or keeping it)
     const history = messages.filter(m => m.role !== 'system')
     
     setMessages(prev => [...prev, userMessage])

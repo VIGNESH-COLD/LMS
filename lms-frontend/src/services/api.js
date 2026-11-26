@@ -1,7 +1,10 @@
 import axios from 'axios'
 
+const API_BASE_URL = import.meta.env.VITE_API_URL || '/api'
+
 const api = axios.create({
-  baseURL: '/api',
+  baseURL: API_BASE_URL,
+  timeout: 30000,
   headers: { 'Content-Type': 'application/json' },
 })
 
@@ -22,7 +25,9 @@ api.interceptors.response.use(
       sessionStorage.removeItem('lms_user')
       localStorage.removeItem('lms_token')
       localStorage.removeItem('lms_user')
-      window.location.href = '/login'
+      if (window.location.pathname !== '/login') {
+        window.location.href = '/login'
+      }
     }
     return Promise.reject(error)
   }
@@ -40,7 +45,7 @@ export const authAPI = {
 export const courseAPI = {
   getAll: () => api.get('/courses'),
   getById: (id) => api.get(`/courses/${id}`),
-  search: (keyword) => api.get(`/courses/search?keyword=${keyword}`),
+  search: (keyword) => api.get(`/courses/search?keyword=${encodeURIComponent(keyword)}`),
   getInstructorCourses: () => api.get('/courses/instructor'),
   getEnrolledCourses: () => api.get('/courses/enrolled'),
   create: (data) => api.post('/courses', data),
@@ -91,7 +96,7 @@ export const fileAPI = {
       headers: { 'Content-Type': 'multipart/form-data' },
     })
   },
-  getUrl: (fileName) => `/api/files/${fileName}`,
+  getUrl: (fileName) => `${API_BASE_URL}/files/${encodeURIComponent(fileName)}`,
 }
 
 // Analytics
@@ -208,7 +213,7 @@ export const courseMaterialAPI = {
   getByCourse: (courseId) => api.get(`/course-materials/course/${courseId}`),
   getMyMaterials: () => api.get('/course-materials/instructor'),
   delete: (id) => api.delete(`/course-materials/${id}`),
-  getDownloadUrl: (storedFileName) => `/api/files/${storedFileName}`,
+  getDownloadUrl: (storedFileName) => `${API_BASE_URL}/files/${encodeURIComponent(storedFileName)}`,
 }
 
 // Chatbot

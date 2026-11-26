@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -33,36 +34,37 @@ public class ChatbotService {
     private final QuizRepository quizRepository;
     private final AssignmentRepository assignmentRepository;
 
-    @Value("${app.mistral.api-url:https://api.mistral.ai/v1/chat/completions}")
-    private String mistralApiUrl;
+    @Value("${app.groq.api-url:https://api.groq.com/openai/v1/chat/completions}")
+    private String groqApiUrl;
 
-    @Value("${app.mistral.api-key:EcUefyGHLhCczHMJCvspkOdU6lJSe73O}")
-    private String mistralApiKey;
+    @Value("${app.groq.api-key:}")
+    private String groqApiKey;
 
-    @Value("${app.mistral.model:mistral-small-latest}")
-    private String mistralModel;
-
-    @Value("${app.ollama.base-url}")
-    private String ollamaBaseUrl;
-
-    @Value("${app.ollama.model}")
-    private String ollamaModel;
+    @Value("${app.groq.model:llama-3.3-70b-versatile}")
+    private String groqModel;
 
     public String chat(String email, String userMessage, List<Map<String, String>> conversationHistory) {
+        if (userMessage == null || userMessage.isBlank()) {
+            return "Please enter a question.";
+        }
+        if (userMessage.length() > 2000) {
+            return "Your message is too long. Please keep questions under 2000 characters.";
+        }
+
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
+        if (groqApiKey == null || groqApiKey.isBlank() || groqApiKey.equals("YOUR_GROQ_API_KEY")) {
+            return "Groq API key is not configured. Please set GROQ_API_KEY or app.groq.api-key in application.properties.";
+        }
+
         String systemPrompt = buildSystemPrompt(user);
-        
+
         try {
-            return callOllama(systemPrompt, userMessage, conversationHistory);
+            return callGroq(systemPrompt, userMessage, conversationHistory);
         } catch (Exception e) {
-            log.warn("Ollama direct call failed, falling back to Mistral. Error: {}", e.getMessage());
-            try {
-                return callMistral(systemPrompt, userMessage, conversationHistory);
-            } catch (Exception mistralEx) {
-                return "The AI assistant is temporarily unavailable. Please make sure Ollama is running (`ollama serve`) and try again.";
-            }
+            log.error("Groq API call failed: {}", e.getMessage());
+            return "The AI assistant is temporarily unavailable. Please check your Groq API key and network connection, then try again.";
         }
     }
 
@@ -420,8 +422,11 @@ public class ChatbotService {
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
-    private String callMistral(String systemPrompt, String userMessage, List<Map<String, String>> conversationHistory) {
-        RestTemplate restTemplate = new RestTemplate();
+    private String callGroq(String systemPrompt, String userMessage, List<Map<String, String>> conversationHistory) {
+        SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
+        factory.setConnectTimeout(10_000);
+        factory.setReadTimeout(30_000);
+        RestTemplate restTemplate = new RestTemplate(factory);
 
         List<Map<String, String>> messages = new ArrayList<>();
         messages.add(Map.of("role", "system", "content", systemPrompt));
@@ -429,8 +434,10 @@ public class ChatbotService {
         if (conversationHistory != null) {
             int start = Math.max(0, conversationHistory.size() - 20);
             for (Map<String, String> msg : conversationHistory.subList(start, conversationHistory.size())) {
-                if (msg.containsKey("role") && msg.containsKey("content")) {
-                    messages.add(Map.of("role", msg.get("role"), "content", msg.get("content")));
+                String role = msg.get("role");
+                String content = msg.get("content");
+                if (role != null && content != null && (role.equals("user") || role.equals("assistant"))) {
+                    messages.add(Map.of("role", role, "content", content));
                 }
             }
         }
@@ -438,20 +445,20 @@ public class ChatbotService {
         messages.add(Map.of("role", "user", "content", userMessage));
 
         Map<String, Object> requestBody = new HashMap<>();
-        requestBody.put("model", mistralModel);
+        requestBody.put("model", groqModel);
         requestBody.put("messages", messages);
         requestBody.put("temperature", 0.3);
         requestBody.put("top_p", 0.9);
-        requestBody.put("max_tokens", 512);
+        requestBody.put("max_tokens", 1024);
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.setBearerAuth(mistralApiKey);
-        
+        headers.setBearerAuth(groqApiKey);
+
         HttpEntity<Map<String, Object>> entity = new HttpEntity<>(requestBody, headers);
 
         try {
-            ResponseEntity<Map> response = restTemplate.postForEntity(mistralApiUrl, entity, Map.class);
+            ResponseEntity<Map> response = restTemplate.postForEntity(groqApiUrl, entity, Map.class);
             if (response.getBody() != null && response.getBody().containsKey("choices")) {
                 List<Map<String, Object>> choices = (List<Map<String, Object>>) response.getBody().get("choices");
                 if (!choices.isEmpty()) {
@@ -459,55 +466,10 @@ public class ChatbotService {
                     return (String) message.get("content");
                 }
             }
-            throw new RuntimeException("Unexpected response from Mistral API");
+            throw new RuntimeException("Unexpected response from Groq API");
         } catch (org.springframework.web.client.RestClientResponseException e) {
-            log.error("Mistral API HTTP Error: {} - {}", e.getStatusCode(), e.getResponseBodyAsString());
-            throw new RuntimeException("Mistral API error: " + e.getResponseBodyAsString(), e);
-        }
-    }
-
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    private String callOllama(String systemPrompt, String userMessage, List<Map<String, String>> conversationHistory) {
-        try {
-            RestTemplate restTemplate = new RestTemplate();
-
-            List<Map<String, String>> messages = new ArrayList<>();
-            messages.add(Map.of("role", "system", "content", systemPrompt));
-
-            // Add conversation history (limit to last 10 exchanges)
-            if (conversationHistory != null) {
-                int start = Math.max(0, conversationHistory.size() - 20);
-                messages.addAll(conversationHistory.subList(start, conversationHistory.size()));
-            }
-
-            messages.add(Map.of("role", "user", "content", userMessage));
-
-            Map<String, Object> requestBody = new HashMap<>();
-            requestBody.put("model", ollamaModel);
-            requestBody.put("messages", messages);
-            requestBody.put("stream", false);
-            requestBody.put("options", Map.of(
-                "temperature", 0.3,
-                "num_predict", 512,
-                "top_p", 0.9
-            ));
-
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_JSON);
-            HttpEntity<Map<String, Object>> entity = new HttpEntity<>(requestBody, headers);
-
-            ResponseEntity<Map> response = restTemplate.postForEntity(
-                    ollamaBaseUrl + "/api/chat", entity, Map.class);
-
-            if (response.getBody() != null && response.getBody().containsKey("message")) {
-                Map<String, Object> message = (Map<String, Object>) response.getBody().get("message");
-                return (String) message.get("content");
-            }
-
-            return "I received an unexpected response. Please try again.";
-        } catch (Exception e) {
-            log.error("Ollama API error: {}", e.getMessage());
-            throw new RuntimeException("Ollama API error: " + e.getMessage(), e);
+            log.error("Groq API HTTP Error: {} - {}", e.getStatusCode(), e.getResponseBodyAsString());
+            throw new RuntimeException("Groq API error: " + e.getResponseBodyAsString(), e);
         }
     }
 }

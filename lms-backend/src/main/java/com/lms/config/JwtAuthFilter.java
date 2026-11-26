@@ -45,7 +45,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                 var dbUser = userRepository.findByEmail(email).orElse(null);
                 if (dbUser != null) {
-                    String role = jwtUtil.extractRole(token);
+                    String role = dbUser.getRole().name();
                     UserDetails userDetails = new User(
                             dbUser.getEmail(),
                             dbUser.getPassword(),
